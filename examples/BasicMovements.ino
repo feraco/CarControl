@@ -8,17 +8,19 @@ void setup() {
 }
 
 void loop() {
-  car.moveForward(2000);  // Move forward for 2 seconds
-  delay(1000);            // Wait for 1 second
+  int speed = 255;  // Set the speed of the car (0 to 255)
+  
+  car.moveForward(speed, 2000);  // Move forward at the specified speed for 2 seconds
+  delay(1000);                   // Wait for 1 second
 
-  car.moveBackward(2000);  // Move backward for 2 seconds
-  delay(1000);             // Wait for 1 second
+  car.moveBackward(speed, 2000);  // Move backward at the specified speed for 2 seconds
+  delay(1000);                    // Wait for 1 second
 
-  car.turnLeft(2000);  // Turn left for 2 seconds
-  delay(1000);         // Wait for 1 second
+  car.turnLeft(speed, 2000);  // Turn left at the specified speed for 2 seconds
+  delay(1000);                 // Wait for 1 second
 
-  car.turnRight(2000);  // Turn right for 2 seconds
-  delay(1000);          // Wait for 1 second
+  car.turnRight(speed, 2000);  // Turn right at the specified speed for 2 seconds
+  delay(1000);                 // Wait for 1 second
 
   car.turnAround();  // Perform a 180-degree turn
   delay(1000);       // Wait for 1 second
