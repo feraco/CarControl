@@ -31,12 +31,15 @@ void loop() {
   // Calculating the distance
   distance= duration*0.034/2;
 
+  int speed = 255;  // Set the speed of the car (0 to 255)
+
   // If the distance is greater than 15 cm
   if (distance > 15) {
-    car.moveForward(2000);  // Move forward for 2 seconds
+    car.moveForward(speed, 2000);  // Move forward at the specified speed for 2 seconds
   } else {
     car.stopMotors();  // Stop the motors
   }
 
   delay(1000);  // Wait for 1 second
 }
+
