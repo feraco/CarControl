@@ -16,6 +16,8 @@ void setup() {
 }
 
 void loop() {
+  int speed = 255;  // Set the speed of the car (0 to 255)
+  
   // While loop example
   while (true) {
     // Clears the trigPin
@@ -35,7 +37,7 @@ void loop() {
 
     // Check if the distance is greater than 15 cm
     if (distance > 15) {
-      car.moveForward(200);  // Move forward for 200 milliseconds
+      car.moveForward(speed, 200);  // Move forward at the specified speed for 200 milliseconds
     } else {
       car.stopMotors();  // Stop the motors
       break;  // Break out of the while loop
