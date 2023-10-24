@@ -32,15 +32,15 @@ void CarControl::setup() {
   digitalWrite(_stby, HIGH);
 }
 
-// Function to move the car forward for a specified duration
-void CarControl::moveForward(int duration) {
+// Function to move the car forward for a specified duration with speed
+void CarControl::moveForward(int duration, int speed) {
   // Set motor direction to forward
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, HIGH);
 
-  // Set motor power to high
-  digitalWrite(_pwma, HIGH);
-  digitalWrite(_pwmb, HIGH);
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
 
   // Wait for the specified duration
   delay(duration);
@@ -49,15 +49,15 @@ void CarControl::moveForward(int duration) {
   stopMotors();
 }
 
-// Function to move the car backward for a specified duration
-void CarControl::moveBackward(int duration) {
+// Function to move the car backward for a specified duration with speed
+void CarControl::moveBackward(int duration, int speed) {
   // Set motor direction to backward
   digitalWrite(_ain, LOW);
   digitalWrite(_bin, LOW);
 
-  // Set motor power to high
-  digitalWrite(_pwma, HIGH);
-  digitalWrite(_pwmb, HIGH);
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
 
   // Wait for the specified duration
   delay(duration);
@@ -66,15 +66,15 @@ void CarControl::moveBackward(int duration) {
   stopMotors();
 }
 
-// Function to turn the car left for a specified duration
-void CarControl::turnLeft(int duration) {
+// Function to turn the car left for a specified duration with speed
+void CarControl::turnLeft(int duration, int speed) {
   // Set motor directions to turn left
   digitalWrite(_ain, LOW);
   digitalWrite(_bin, HIGH);
 
-  // Set motor power to high
-  digitalWrite(_pwma, HIGH);
-  digitalWrite(_pwmb, HIGH);
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
 
   // Wait for the specified duration
   delay(duration);
@@ -83,15 +83,15 @@ void CarControl::turnLeft(int duration) {
   stopMotors();
 }
 
-// Function to turn the car right for a specified duration
-void CarControl::turnRight(int duration) {
+// Function to turn the car right for a specified duration with speed
+void CarControl::turnRight(int duration, int speed) {
   // Set motor directions to turn right
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, LOW);
 
-  // Set motor power to high
-  digitalWrite(_pwma, HIGH);
-  digitalWrite(_pwmb, HIGH);
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
 
   // Wait for the specified duration
   delay(duration);
@@ -125,15 +125,15 @@ void CarControl::turnAround() {
   turnLeft(1000);
 }
 
-// Function to move the car forward at reduced speed for a specified duration
-void CarControl::moveSlowForward(int duration) {
+// Function to move the car forward at reduced speed for a specified duration with speed
+void CarControl::moveSlowForward(int duration, int speed) {
   // Set motor direction to forward
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, HIGH);
 
-  // Set motor power to reduced speed (values range from 0 to 255)
-  analogWrite(_pwma, 150);
-  analogWrite(_pwmb, 150);
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
 
   // Wait for the specified duration
   delay(duration);
@@ -142,7 +142,7 @@ void CarControl::moveSlowForward(int duration) {
   stopMotors();
 }
 
-// Function to create a custom movement pattern
+// Function to create a custom movement pattern with speed
 void CarControl::customMovement(int ainState, int binState, int pwmaPower, int pwmbPower, int duration) {
   // Set custom motor directions
   digitalWrite(_ain, ainState);
