@@ -14,7 +14,7 @@ public:
     void stopMotors();
     void stopTime(int mS);
     void turnAround();
-    void CarControl::moveSlowForward(int duration, int speed) {
+    void moveSlowForward(int duration, int speed);  // Corrected line
     void customMovement(int ainState, int binState, int pwmaPower, int pwmbPower, int duration);
 
 private:
