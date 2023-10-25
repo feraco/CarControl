@@ -121,9 +121,10 @@ void CarControl::stopTime(int mS) {
 
 // Function to make the car perform a 180-degree turn
 void CarControl::turnAround() {
-  // Turn left for 1 second (adjust duration as needed)
-  turnLeft(1000);
+  // Turn left for 1 second at a default speed (adjust duration and speed as needed)
+  turnLeft(1000, 255);  // Added a second argument for speed
 }
+
 
 // Function to move the car forward at reduced speed for a specified duration with speed
 void CarControl::moveSlowForward(int duration, int speed) {
