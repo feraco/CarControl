@@ -1,71 +1,77 @@
-# CarControl Library for Arduino
+## Controlling the ELEGOO Arduino Smart Car
 
-The CarControl library is a custom library designed for controlling a car using an Arduino. It encapsulates the common car movements like moving forward, moving backward, turning left, and turning right into simple function calls.
+The Car Control Library provides you with a suite of functions to control the car's movements with ease.
 
-## Installation
+### Functions:
 
-To install this library, download the zip file and unzip it into your Arduino libraries folder. 
+1. **Move Forward**
+   - `car.moveForward(speed, duration);`
+   - **Description**: Moves the car forward.
+   - **Parameters**:
+     - `speed`: Speed of the car.
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.moveForward(255, 2000);` moves the car forward at maximum speed for 2 seconds.
 
-1. Download the library as a ZIP file.
-2. Open the Arduino IDE.
-3. Go to Sketch > Include Library > Add .ZIP Library...
-4. Select the downloaded ZIP file.
-5. The library will now be available for use in your sketches.
+2. **Move Backward**
+   - `car.moveBackward(speed, duration);`
+   - **Description**: Moves the car backward.
+   - **Parameters**:
+     - `speed`: Speed of the car.
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.moveBackward(200, 1500);` moves the car backward at speed 200 for 1.5 seconds.
 
-## Usage
+3. **Turn Left**
+   - `car.turnLeft(speed, duration);`
+   - **Description**: Turns the car left.
+   - **Parameters**:
+     - `speed`: Speed of the turn.
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.turnLeft(180, 1000);` turns the car left at speed 180 for 1 second.
 
-First, you must include the library in your sketch.
+4. **Turn Right**
+   - `car.turnRight(speed, duration);`
+   - **Description**: Turns the car right.
+   - **Parameters**:
+     - `speed`: Speed of the turn.
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.turnRight(150, 500);` turns the car right at speed 150 for half a second.
 
-```cpp
-#include "CarControl.h"
-Next, create a CarControl object with the following parameters:
+5. **Stop Motors**
+   - `car.stopMotors();`
+   - **Description**: Stops all of the car's motors.
+   - **Example**: `car.stopMotors();` stops the car.
 
-PWMA: Controls power to right motor
-PWMB: Controls power to left motor
-AIN: Controls direction of right motor, HIGH = FORWARD, LOW = REVERSE
-BIN: Controls direction of left motor, HIGH = FORWARD, LOW = REVERSE
-STBY: Places H-Bridge in standby if LOW, runs if HIGH
-modeSwitch: Mode Switch input
+6. **Stop Time**
+   - `car.stopTime(mS);`
+   - **Description**: Places the car in standby for a specified duration.
+   - **Parameters**:
+     - `mS`: Standby time in milliseconds.
+   - **Example**: `car.stopTime(1000);` puts the car in standby for 1 second.
 
-CarControl car(PWMA, PWMB, AIN, BIN, STBY, modeSwitch);
+7. **Turn Around**
+   - `car.turnAround(speed);`
+   - **Description**: Turns the car around 180 degrees.
+   - **Parameters**:
+     - `speed`: Speed of the turn.
+   - **Example**: `car.turnAround(200);` turns the car 180 degrees at speed 200.
 
-Before using the car's movements, you must call the setup function in the setup function of your sketch.
+8. **Move Slow Forward**
+   - `car.moveSlowForward(duration);`
+   - **Description**: Moves the car forward at a slow speed.
+   - **Parameters**:
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.moveSlowForward(3000);` moves the car forward slowly for 3 seconds.
 
+9. **Custom Movement**
+   - `car.customMovement(ainState, binState, pwmaPower, pwmbPower, duration);`
+   - **Description**: Creates a custom movement pattern.
+   - **Parameters**:
+     - `ainState` & `binState`: States for motors A and B.
+     - `pwmaPower` & `pwmbPower`: Power levels for motors A and B.
+     - `duration`: Duration in milliseconds.
+   - **Example**: `car.customMovement(HIGH, LOW, 200, 150, 2500);` creates a custom movement.
 
-void setup() {
-  car.setup();
-}
-You can then use the following functions to control the car's movements:
+### Examples:
 
-car.moveForward(duration): Move the car forward for a specified duration in milliseconds.
-
-car.moveBackward(duration): Move the car backward for a specified duration in milliseconds.
-
-car.turnLeft(duration): Turn the car left for a specified duration in milliseconds.
-
-car.turnRight(duration): Turn the car right for a specified duration in milliseconds.
-
-car.stopMotors(): Stop the car's motors.
-
-car.stopTime(mS): Place the car in standby for a specified duration in milliseconds.
-
-car.turnAround(): Turn the car around 180 degrees.
-
-car.moveSlowForward(duration): Move the car forward at a reduced speed for a specified duration in milliseconds.
-
-car.customMovement(ainState, binState, pwmaPower, pwmbPower, duration): Create a custom movement pattern with specified states and power levels.
-Examples
-
-The examples folder contains several example sketches demonstrating how to use the CarControl library:
-
-BasicMovements.ino: Demonstrates the basic movements of the car.
-
-LoopMovements.ino: Demonstrates how to use a for loop to repeat movements.
-
-
-UltrasonicSensor.ino: Demonstrates how to control the car using an ultrasonic sensor.
-
-WhileLoop.ino: Demonstrates how to use a while loop to repeat movements until a condition is met.
-Credits
-
-Created by Frederick Feraco, NYS Master Teacher in Coding Robotics.
+- `BasicMovements.ino`: Demonstrates the basic movements of the car.
+- `LoopMovements.ino`: Demonstrates looped sequences of actions.
