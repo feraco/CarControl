@@ -15,7 +15,7 @@ public:
     void stopTime(int mS);
     void turnAround();
     void moveSlowForward(int duration, int speed);  // Corrected line
-    void customMovement(int ainState, int binState, int pwmaPower, int pwmbPower, int duration);
+    void customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration);
 
 private:
     void setMotorSpeed(int speed);
