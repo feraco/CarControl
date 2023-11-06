@@ -144,18 +144,23 @@ void CarControl::moveSlowForward(int duration, int speed) {
 }
 
 // Function to create a custom movement pattern with speed
-void CarControl::customMovement(int ainState, int binState, int pwmaPower, int pwmbPower, int duration) {
-  // Set custom motor directions
-  digitalWrite(_ain, ainState);
-  digitalWrite(_bin, binState);
+// Function to create a custom movement pattern
+void CarControl::customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration) {
+  // Set motor A direction to forward or backward based on forwardA
+  digitalWrite(_ain, forwardA ? HIGH : LOW);
 
-  // Set custom motor power
-  analogWrite(_pwma, pwmaPower);
-  analogWrite(_pwmb, pwmbPower);
+  // Set motor B direction to forward or backward based on forwardB
+  digitalWrite(_bin, forwardB ? HIGH : LOW);
 
-  // Wait for the specified duration
+  // Set motor A power to the specified speed (0-255)
+  analogWrite(_pwma, speedA);
+
+  // Set motor B power to the specified speed (0-255)
+  analogWrite(_pwmb, speedB);
+
+  // Wait for the specified duration in milliseconds
   delay(duration);
 
-  // Stop the motors
+  // Stop the motors after the duration has passed
   stopMotors();
 }
