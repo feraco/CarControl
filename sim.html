@@ -10,6 +10,7 @@
     width: 50px;
     height: 100px;
     background-color: blue;
+    transition: all 0.5s ease; /* This provides a basic animation effect */
   }
 </style>
 </head>
@@ -17,34 +18,68 @@
 
 <div id="car"></div>
 
-<button onclick="moveForward()">Move Forward</button>
-<button onclick="moveBackward()">Move Backward</button>
-<button onclick="turnLeft()">Turn Left</button>
-<button onclick="turnRight()">Turn Right</button>
+<label for="command">Command:</label>
+<select id="command">
+  <option value="forward">Forward</option>
+  <option value="backward">Backward</option>
+  <option value="left">Left</option>
+  <option value="right">Right</option>
+</select>
+
+<label for="duration">Duration (ms):</label>
+<input type="number" id="duration" value="1000" />
+
+<label for="speed">Speed (0-255):</label>
+<input type="number" id="speed" value="255" />
+
+<button onclick="runCommand()">Run Command</button>
 
 <script>
 const carElement = document.getElementById('car');
-let topPosition = 0;
-let leftPosition = 0;
 
-function moveForward() {
-  topPosition -= 10; // Move up
-  carElement.style.top = topPosition + 'px';
+// We'll use a timeout to ensure commands run one after another
+let lastTimeout = null;
+
+function moveCar(direction, duration, speed) {
+  clearTimeout(lastTimeout); // Clear the last timeout to reset the command sequence
+
+  const speedFactor = speed / 255; // Speed factor based on max speed 255
+  const distance = 10 * speedFactor; // Simple calculation for distance
+
+  switch (direction) {
+    case 'forward':
+      carElement.style.transform = `translateY(${distance}px)`;
+      break;
+    case 'backward':
+      carElement.style.transform = `translateY(-${distance}px)`;
+      break;
+    case 'left':
+      carElement.style.transform = `translateX(-${distance}px)`;
+      break;
+    case 'right':
+      carElement.style.transform = `translateX(${distance}px)`;
+      break;
+    default:
+      console.log('Invalid direction:', direction);
+      return;
+  }
+
+  // Set the transition duration based on the speed factor
+  carElement.style.transition = `all ${duration/1000}s ease`;
 }
 
-function moveBackward() {
-  topPosition += 10; // Move down
-  carElement.style.top = topPosition + 'px';
-}
+function runCommand() {
+  const direction = document.getElementById('command').value;
+  const duration = parseInt(document.getElementById('duration').value, 10);
+  const speed = parseInt(document.getElementById('speed').value, 10);
 
-function turnLeft() {
-  leftPosition -= 10; // Move left
-  carElement.style.left = leftPosition + 'px';
-}
+  moveCar(direction, duration, speed);
 
-function turnRight() {
-  leftPosition += 10; // Move right
-  carElement.style.left = leftPosition + 'px';
+  // Set the timeout to prevent a new command from starting
+  lastTimeout = setTimeout(() => {
+    carElement.style.transform = ''; // Reset the transform after the duration
+    carElement.style.transition = '';
+  }, duration);
 }
 </script>
 
