@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elegoo Car Simulator</title>
+<style>
+  #car {
+    position: relative;
+    width: 50px;
+    height: 100px;
+    background-color: blue;
+  }
+</style>
+</head>
+<body>
+
+<div id="car"></div>
+
+<button onclick="moveForward()">Move Forward</button>
+<button onclick="moveBackward()">Move Backward</button>
+<button onclick="turnLeft()">Turn Left</button>
+<button onclick="turnRight()">Turn Right</button>
+
+<script>
+const carElement = document.getElementById('car');
+let topPosition = 0;
+let leftPosition = 0;
+
+function moveForward() {
+  topPosition -= 10; // Move up
+  carElement.style.top = topPosition + 'px';
+}
+
+function moveBackward() {
+  topPosition += 10; // Move down
+  carElement.style.top = topPosition + 'px';
+}
+
+function turnLeft() {
+  leftPosition -= 10; // Move left
+  carElement.style.left = leftPosition + 'px';
+}
+
+function turnRight() {
+  leftPosition += 10; // Move right
+  carElement.style.left = leftPosition + 'px';
+}
+</script>
+
+</body>
+</html>
