@@ -5,35 +5,67 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elegoo Car Simulator</title>
 <style>
-  #car {
+  body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f7f7f7;
+  }
+
+  #grid {
     position: relative;
+    width: 500px; /* increased width */
+    height: 500px; /* increased height */
+    background-image: linear-gradient(0deg, lightgrey 1px, transparent 1px), 
+                      linear-gradient(90deg, lightgrey 1px, transparent 1px);
+    background-size: 50px 50px; /* size of each grid square */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #car {
+    position: absolute;
     width: 50px;
     height: 100px;
     background-color: blue;
     transition: all 0.5s ease; /* This provides a basic animation effect */
   }
+
+  .controls {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+  }
 </style>
 </head>
 <body>
 
-<div id="car"></div>
+<div id="grid">
+  <div id="car"></div>
+</div>
 
-<label for="command">Command:</label>
-<select id="command">
-  <option value="forward">Forward</option>
-  <option value="backward">Backward</option>
-  <option value="left">Left</option>
-  <option value="right">Right</option>
-</select>
+<div class="controls">
+  <label for="command">Command:</label>
+  <select id="command">
+    <option value="forward">Forward</option>
+    <option value="backward">Backward</option>
+    <option value="left">Left</option>
+    <option value="right">Right</option>
+  </select>
 
-<label for="duration">Duration (ms):</label>
-<input type="number" id="duration" value="1000" />
+  <label for="duration">Duration (ms):</label>
+  <input type="number" id="duration" value="1000" />
 
-<label for="speed">Speed (0-255):</label>
-<input type="number" id="speed" value="255" />
+  <label for="speed">Speed (0-255):</label>
+  <input type="number" id="speed" value="255" />
 
-<button onclick="runCommand()">Run Command</button>
-
+  <button onclick="runCommand()">Run Command</button>
+</div>
 <script>
 const carElement = document.getElementById('car');
 
