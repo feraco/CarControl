@@ -62,16 +62,19 @@ The Car Control Library provides you with a suite of functions to control the ca
      - `duration`: Duration in milliseconds.
    - **Example**: `car.moveSlowForward(3000);` moves the car forward slowly for 3 seconds.
 
-9. **Custom Movement**
-car.customMovement(forwardA, forwardB, speedA, speedB, duration);
-Description: Executes a custom movement pattern.
-Parameters:
-forwardA: Boolean flag to set motor A's direction.
-forwardB: Boolean flag to set motor B's direction.
-speedA: Speed setting for motor A (0-255).
-speedB: Speed setting for motor B (0-255).
-duration: Time for which the movement should last in milliseconds.
-Example: car.customMovement(true, false, 200, 150, 2500); will make motor A move forward and motor B move backward, creating a custom motion for the car.
+### Custom Movement
+- **Signature**: `car.customMovement(forwardA, forwardB, speedA, speedB, duration)`
+- **Description**: Executes a custom movement pattern.
+- **Parameters**:
+  - `forwardA`: Boolean flag to set motor A's direction (forward if `true`, backward if `false`).
+  - `forwardB`: Boolean flag to set motor B's direction.
+  - `speedA`: Speed setting for motor A (0-255).
+  - `speedB`: Speed setting for motor B (0-255).
+  - `duration`: Time for which the movement should last in milliseconds.
+- **Example**: `car.customMovement(true, false, 200, 150, 2500);` will make motor A move forward and motor B move backward, creating a custom motion for the car.
+
+## Understanding Motor Actions for Movement
+
 ### Examples:
 
 - `BasicMovements.ino`: Demonstrates the basic movements of the car.
