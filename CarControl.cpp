@@ -62,7 +62,7 @@ void CarControl::checkObstacleInFront() {
 
 // Function to get the distance to the nearest obstacle
 int CarControl::getDistanceToObstacle() {
-  return ultrasonic.Ranging(CM);  // Return distance in centimeters
+    return ultrasonic.distanceCm();  // Updated function call
 }
 
 // Function to read the value of the infrared sensor
