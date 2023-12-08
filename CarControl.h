@@ -1,47 +1,207 @@
-#ifndef CarControl_h
-#define CarControl_h
+/*
+ * Title: CarControl.cpp
+ * Author: Frederick Feraco
+ * Affiliation: New York State Master Teacher
+ * Description: This library provides functionalities for controlling the movement of a car 
+ * robot with an Arduino. This file contains the implementation of the CarControl class.
+ */
+#include "CarControl.h"
+// Additional includes for sensor readings
+#include <Ultrasonic.h>  // Assuming use of Ultrasonic sensor for distance measurement
 
-#include "Arduino.h"
-#include <Ultrasonic.h>  // Include for Ultrasonic sensor
+// Define pins for Ultrasonic sensor
+#define TRIG_PIN 13
+#define ECHO_PIN 12
 
-class CarControl {
-public:
-    // Constructor
-    CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeSwitch);
+// Initialize the ultrasonic sensor
+Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
 
-    // Setup and movement functions
-    void setup();
-    void moveForward(int speed, int duration);
-    void moveBackward(int speed, int duration);
-    void turnLeft(int speed, int duration);
-    void turnRight(int speed, int duration);
-    void stopMotors();
-    void stopTime(int mS);
-    void turnAround();
-    void moveSlowForward(int duration, int speed);  // Corrected line
-    void customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration);
+// Define pin for Infrared sensor
+#define IR_SENSOR_PIN A0
 
-    // New functionalities
-    void checkObstacleInFront(); // Checks if there's an obstacle in front
-    int getDistanceToObstacle(); // Measures the distance to an obstacle
-    int getValueOfInfraredSensor(); // Reads the value of the infrared sensor
-  //  void checkIfCarWasPickedUp(); // Checks if the car was picked up
+// Class variables for new functionalities
+bool _obstacleInFront;
+// Constructor function for CarControl class, initializes the motor and sensor pins
+CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeSwitch) {
+  // Assign the parameter values to the class variables
+  _pwma = pwma;
+  _pwmb = pwmb;
+  _ain = ain;
+  _bin = bin;
+  _stby = stby;
+  _modeSwitch = modeSwitch;
+    pinMode(IR_SENSOR_PIN, INPUT);
+     _obstacleInFront = false;
+  //   _carWasPickedUp = false;
+   
+}
 
-private:
-    // Motor control variables
-    int _pwma, _pwmb, _ain, _bin, _stby, _modeSwitch;
+// Setup function to initialize the IO pins
+void CarControl::setup() {
+  // Set the motor and standby pins as OUTPUT
+  pinMode(_pwma, OUTPUT);
+  pinMode(_pwmb, OUTPUT);
+  pinMode(_bin, OUTPUT);
+  pinMode(_ain, OUTPUT);
+  pinMode(_stby, OUTPUT);
 
-    // New private member variables
-    bool _obstacleInFront; // Flag for obstacle detection
-    //bool _carWasPickedUp; // Flag for detecting if car was picked up
+  // Set the motor pins to LOW and standby pin to HIGH
+  digitalWrite(_pwma, LOW);
+  digitalWrite(_stby, HIGH);
+}
 
-    // Sensor pins (if required, can be adjusted)
-    static const int _trigPin = 9;    // Ultrasonic sensor trigger pin
-    static const int _echoPin = 10;   // Ultrasonic sensor echo pin
-    static const int _irSensorPin = A0; // IR sensor pin
+// Function to check for an obstacle in front
+void CarControl::checkObstacleInFront() {
+    long distance = ultrasonic.distanceRead();  // Updated function call
+    if (distance < 10) {  // Assuming obstacle is considered within 10 cm
+        _obstacleInFront = true;
+    } else {
+        _obstacleInFront = false;
+    }
+}
 
-    // Ultrasonic sensor instance
-    Ultrasonic _ultrasonic = Ultrasonic(_trigPin, _echoPin);
-};
 
-#endif /* CarControl_h */
+// Function to get the distance to the nearest obstacle
+int CarControl::getDistanceToObstacle() {
+    return ultrasonic.distanceRead();  // Updated function call
+}
+
+// Function to read the value of the infrared sensor
+int CarControl::getValueOfInfraredSensor() {
+  return analogRead(IR_SENSOR_PIN);  // Read and return the value from IR sensor
+}
+
+// Function to check if the car was picked up
+
+// Function to move the car forward for a specified duration with speed
+void CarControl::moveForward(int duration, int speed) {
+  // Set motor direction to forward
+  digitalWrite(_ain, HIGH);
+  digitalWrite(_bin, HIGH);
+
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
+
+  // Wait for the specified duration
+  delay(duration);
+
+  // Stop the motors
+  stopMotors();
+}
+
+// Function to move the car backward for a specified duration with speed
+void CarControl::moveBackward(int duration, int speed) {
+  // Set motor direction to backward
+  digitalWrite(_ain, LOW);
+  digitalWrite(_bin, LOW);
+
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
+
+  // Wait for the specified duration
+  delay(duration);
+
+  // Stop the motors
+  stopMotors();
+}
+
+// Function to turn the car left for a specified duration with speed
+void CarControl::turnLeft(int duration, int speed) {
+  // Set motor directions to turn left
+  digitalWrite(_ain, LOW);
+  digitalWrite(_bin, HIGH);
+
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
+
+  // Wait for the specified duration
+  delay(duration);
+
+  // Stop the motors
+  stopMotors();
+}
+
+// Function to turn the car right for a specified duration with speed
+void CarControl::turnRight(int duration, int speed) {
+  // Set motor directions to turn right
+  digitalWrite(_ain, HIGH);
+  digitalWrite(_bin, LOW);
+
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
+
+  // Wait for the specified duration
+  delay(duration);
+
+  // Stop the motors
+  stopMotors();
+}
+
+// Function to stop the motors
+void CarControl::stopMotors() {
+  // Set motor power to low
+  digitalWrite(_pwma, LOW);
+  digitalWrite(_pwmb, LOW);
+}
+
+// Function to put the car in standby mode for a specified duration
+void CarControl::stopTime(int mS) {
+  // Set standby pin to low (standby mode)
+  digitalWrite(_stby, LOW);
+
+  // Wait for the specified duration
+  delay(mS);
+
+  // Set standby pin to high (active mode)
+  digitalWrite(_stby, HIGH);
+}
+
+// Function to make the car perform a 180-degree turn
+void CarControl::turnAround() {
+  // Turn left for 1 second at a default speed (adjust duration and speed as needed)
+  turnLeft(1000, 255);  // Added a second argument for speed
+}
+
+
+// Function to move the car forward at reduced speed for a specified duration with speed
+void CarControl::moveSlowForward(int duration, int speed) {
+  // Set motor direction to forward
+  digitalWrite(_ain, HIGH);
+  digitalWrite(_bin, HIGH);
+
+  // Set motor power to the specified speed
+  analogWrite(_pwma, speed);
+  analogWrite(_pwmb, speed);
+
+  // Wait for the specified duration
+  delay(duration);
+
+  // Stop the motors
+  stopMotors();
+}
+
+// Function to create a custom movement pattern with speed
+// Function to create a custom movement pattern
+void CarControl::customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration) {
+  // Set motor A direction to forward or backward based on forwardA
+  digitalWrite(_ain, forwardA ? HIGH : LOW);
+
+  // Set motor B direction to forward or backward based on forwardB
+  digitalWrite(_bin, forwardB ? HIGH : LOW);
+
+  // Set motor A power to the specified speed (0-255)
+  analogWrite(_pwma, speedA);
+
+  // Set motor B power to the specified speed (0-255)
+  analogWrite(_pwmb, speedB);
+
+  // Wait for the specified duration in milliseconds
+  delay(duration);
+
+  // Stop the motors after the duration has passed
+  stopMotors();
+}
