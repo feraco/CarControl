@@ -6,7 +6,21 @@
  * robot with an Arduino. This file contains the implementation of the CarControl class.
  */
 #include "CarControl.h"
+// Additional includes for sensor readings
+#include <Ultrasonic.h>  // Assuming use of Ultrasonic sensor for distance measurement
 
+// Define pins for Ultrasonic sensor
+#define TRIG_PIN 9
+#define ECHO_PIN 10
+
+// Initialize the ultrasonic sensor
+Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
+
+// Define pin for Infrared sensor
+#define IR_SENSOR_PIN A0
+
+// Class variables for new functionalities
+bool _obstacleInFront;
 // Constructor function for CarControl class, initializes the motor and sensor pins
 CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeSwitch) {
   // Assign the parameter values to the class variables
@@ -16,6 +30,10 @@ CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeS
   _bin = bin;
   _stby = stby;
   _modeSwitch = modeSwitch;
+    pinMode(IR_SENSOR_PIN, INPUT);
+     _obstacleInFront = false;
+     _carWasPickedUp = false;
+   
 }
 
 // Setup function to initialize the IO pins
@@ -31,6 +49,28 @@ void CarControl::setup() {
   digitalWrite(_pwma, LOW);
   digitalWrite(_stby, HIGH);
 }
+
+// Function to check for an obstacle in front
+void CarControl::checkObstacleInFront() {
+  long distance = ultrasonic.Ranging(CM);  // Get distance in centimeters
+  if (distance < 10) {  // Assuming obstacle is considered within 10 cm
+    _obstacleInFront = true;
+  } else {
+    _obstacleInFront = false;
+  }
+}
+
+// Function to get the distance to the nearest obstacle
+int CarControl::getDistanceToObstacle() {
+  return ultrasonic.Ranging(CM);  // Return distance in centimeters
+}
+
+// Function to read the value of the infrared sensor
+int CarControl::getValueOfInfraredSensor() {
+  return analogRead(IR_SENSOR_PIN);  // Read and return the value from IR sensor
+}
+
+// Function to check if the car was picked up
 
 // Function to move the car forward for a specified duration with speed
 void CarControl::moveForward(int duration, int speed) {
