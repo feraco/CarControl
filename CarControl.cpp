@@ -10,8 +10,8 @@
 #include <Ultrasonic.h>  // Assuming use of Ultrasonic sensor for distance measurement
 
 // Define pins for Ultrasonic sensor
-#define TRIG_PIN 9
-#define ECHO_PIN 10
+#define TRIG_PIN 13
+#define ECHO_PIN 12
 
 // Initialize the ultrasonic sensor
 Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
@@ -32,10 +32,23 @@ CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeS
   _modeSwitch = modeSwitch;
     pinMode(IR_SENSOR_PIN, INPUT);
      _obstacleInFront = false;
-     _carWasPickedUp = false;
+  //   _carWasPickedUp = false;
    
 }
 
+
+void CarControl::attachClaw(int pin) {
+    _clawServoPin = pin;
+    _clawServo.attach(_clawServoPin); // Attach the servo to the specified pin
+}
+
+void CarControl::openClaw() {
+    _clawServo.write(0); // Replace 0 with the angle that corresponds to the open position
+}
+
+void CarControl::closeClaw() {
+    _clawServo.write(180); // Replace 180 with the angle that corresponds to the closed position
+}
 // Setup function to initialize the IO pins
 void CarControl::setup() {
   // Set the motor and standby pins as OUTPUT
@@ -52,17 +65,18 @@ void CarControl::setup() {
 
 // Function to check for an obstacle in front
 void CarControl::checkObstacleInFront() {
-  long distance = ultrasonic.Ranging(CM);  // Get distance in centimeters
-  if (distance < 10) {  // Assuming obstacle is considered within 10 cm
-    _obstacleInFront = true;
-  } else {
-    _obstacleInFront = false;
-  }
+    long distance = ultrasonic.distanceRead();  // Updated function call
+    if (distance < 10) {  // Assuming obstacle is considered within 10 cm
+        _obstacleInFront = true;
+    } else {
+        _obstacleInFront = false;
+    }
 }
+
 
 // Function to get the distance to the nearest obstacle
 int CarControl::getDistanceToObstacle() {
-    return ultrasonic.distanceCm();  // Updated function call
+    return ultrasonic.distanceRead();  // Updated function call
 }
 
 // Function to read the value of the infrared sensor
