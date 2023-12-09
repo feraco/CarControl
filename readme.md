@@ -74,7 +74,36 @@ The Car Control Library provides you with a suite of functions to control the ca
 - **Example**: `car.customMovement(true, false, 200, 150, 2500);` will make motor A move forward and motor B move backward, creating a custom motion for the car.
 
 ## Understanding Motor Actions for Movement
+#### Ultrasonic Sensor Commands
 
+1. **Check for Obstacle**
+   - `car.checkObstacleInFront();`
+   - **Description**: Checks if there is an obstacle in front of the car.
+   - **Example**: `car.checkObstacleInFront();` updates the `_obstacleInFront` variable based on whether an obstacle is detected.
+
+2. **Get Distance to Obstacle**
+   - `car.getDistanceToObstacle();`
+   - **Description**: Returns the distance to the nearest obstacle in centimeters.
+   - **Example**: `int distance = car.getDistanceToObstacle();` gets the distance to the nearest obstacle.
+
+#### Claw Mechanism Commands
+
+1. **Attach Claw**
+   - `car.attachClaw(pin);`
+   - **Description**: Attaches the claw mechanism to the specified pin.
+   - **Parameters**:
+     - `pin`: The pin where the servo for the claw is connected.
+   - **Example**: `car.attachClaw(9);` attaches the claw servo to pin 9.
+
+2. **Open Claw**
+   - `car.openClaw();`
+   - **Description**: Opens the claw.
+   - **Example**: `car.openClaw();` opens the claw.
+
+3. **Close Claw**
+   - `car.closeClaw();`
+   - **Description**: Closes the claw.
+   - **Example**: `car.closeClaw();` closes the claw.
 ### Examples:
 
 - `BasicMovements.ino`: Demonstrates the basic movements of the car.
