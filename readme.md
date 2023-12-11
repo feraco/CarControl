@@ -35,6 +35,7 @@ The Car Control Library provides you with a suite of functions to control the ca
      - `speed`: Speed of the turn.
      - `duration`: Duration in milliseconds.
    - **Example**: `car.turnRight(150, 500);` turns the car right at speed 150 for half a second.
+![](Movecommands.gif)
 
 5. **Stop Motors**
    - `car.stopMotors();`
