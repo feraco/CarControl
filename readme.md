@@ -86,6 +86,7 @@ The Car Control Library provides you with a suite of functions to control the ca
    - `car.getDistanceToObstacle();`
    - **Description**: Returns the distance to the nearest obstacle in centimeters.
    - **Example**: `int distance = car.getDistanceToObstacle();` gets the distance to the nearest obstacle.
+![]  ultrasonic.gif)
 
 #### Claw Mechanism Commands
 
