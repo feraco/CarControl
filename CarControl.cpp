@@ -87,7 +87,7 @@ int CarControl::getValueOfInfraredSensor() {
 // Function to check if the car was picked up
 
 // Function to move the car forward for a specified duration with speed
-void CarControl::moveForward(int duration, int speed) {
+void CarControl::moveForward(int speed, int duration) {
   // Set motor direction to forward
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, HIGH);
@@ -104,7 +104,7 @@ void CarControl::moveForward(int duration, int speed) {
 }
 
 // Function to move the car backward for a specified duration with speed
-void CarControl::moveBackward(int duration, int speed) {
+void CarControl::moveBackward(int speed, int duration) {
   // Set motor direction to backward
   digitalWrite(_ain, LOW);
   digitalWrite(_bin, LOW);
@@ -121,7 +121,7 @@ void CarControl::moveBackward(int duration, int speed) {
 }
 
 // Function to turn the car left for a specified duration with speed
-void CarControl::turnLeft(int duration, int speed) {
+void CarControl::turnLeft(int speed, int duration) {
   // Set motor directions to turn left
   digitalWrite(_ain, LOW);
   digitalWrite(_bin, HIGH);
@@ -138,7 +138,7 @@ void CarControl::turnLeft(int duration, int speed) {
 }
 
 // Function to turn the car right for a specified duration with speed
-void CarControl::turnRight(int duration, int speed) {
+void CarControl::turnRight(int speed, int duration) {
   // Set motor directions to turn right
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, LOW);
@@ -181,7 +181,7 @@ void CarControl::turnAround() {
 
 
 // Function to move the car forward at reduced speed for a specified duration with speed
-void CarControl::moveSlowForward(int duration, int speed) {
+void CarControl::moveSlowForward(int speed, int duration) {
   // Set motor direction to forward
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, HIGH);
