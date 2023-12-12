@@ -51,8 +51,8 @@ private:
     //bool _carWasPickedUp; // Flag for detecting if car was picked up
 
     // Sensor pins (if required, can be adjusted)
-    static const int _trigPin = 9;    // Ultrasonic sensor trigger pin
-    static const int _echoPin = 10;   // Ultrasonic sensor echo pin
+    static const int _trigPin = 13;    // Ultrasonic sensor trigger pin
+    static const int _echoPin = 12;   // Ultrasonic sensor echo pin
     static const int _irSensorPin = A0; // IR sensor pin
 
     // Ultrasonic sensor instance
