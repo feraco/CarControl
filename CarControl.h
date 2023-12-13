@@ -34,7 +34,7 @@ public:
     void customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration);
     void lookLeft();              // Function to make the ultrasonic sensor look left
     void lookRight();  
-    void centerServo():
+    void centerServo();
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
     int getDistanceToObstacle(); // Measures the distance to an obstacle
