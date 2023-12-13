@@ -35,6 +35,8 @@ public:
     void lookLeft();              // Function to make the ultrasonic sensor look left
     void lookRight();  
     void centerServo();
+    void attachSensorServo(int pin);  // New method to attach the sensor servo
+
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
     int getDistanceToObstacle(); // Measures the distance to an obstacle
@@ -44,7 +46,7 @@ public:
 private:
     // Motor control variables
     int _pwma, _pwmb, _ain, _bin, _stby, _modeSwitch;
-
+    Servo _sensorServo;  // New servo object for the sensor
     // New private member variables
     bool _obstacleInFront; // Flag for obstacle detection
     //bool _carWasPickedUp; // Flag for detecting if car was picked up
