@@ -12,8 +12,6 @@
 // Define pins for Ultrasonic sensor
 #define TRIG_PIN 13
 #define ECHO_PIN 12
-#define SERVO_PIN 10
-Servo myServo;
 
 // Initialize the ultrasonic sensor
 Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
@@ -35,7 +33,7 @@ CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeS
     pinMode(IR_SENSOR_PIN, INPUT);
      _obstacleInFront = false;
   //   _carWasPickedUp = false;
-    myServo.attach(SERVO_PIN);
+   // myServo.attach(SERVO_PIN);
     centerServo();
 }
 
@@ -86,20 +84,20 @@ int CarControl::getDistanceToObstacle() {
 int CarControl::getValueOfInfraredSensor() {
   return analogRead(IR_SENSOR_PIN);  // Read and return the value from IR sensor
 }
-
+void CarControl::attachSensorServo(int pin) {
+    _sensorServo.attach(pin); // Attach the sensor servo to the specified pin
+}
 // Function to make the servo look left
 void CarControl::lookLeft() {
-    myServo.write(0); // Adjust this angle as needed for your setup
+    _sensorServo.write(0); // Adjust this angle as needed for your setup
 }
 
-// Function to make the servo look right
 void CarControl::lookRight() {
-    myServo.write(180); // Adjust this angle as needed for your setup
+    _sensorServo.write(180); // Adjust this angle as needed for your setup
 }
 
-// Function to center the servo
 void CarControl::centerServo() {
-    myServo.write(90); // Assuming 90 degrees is the center position
+    _sensorServo.write(90); // Assuming 90 degrees is the center position
 }
 // Function to move the car forward for a specified duration with speed
 void CarControl::moveForward(int speed, int duration) {
