@@ -149,6 +149,53 @@ void CarControl::turnLeft(int speed, int duration) {
   // Stop the motors
   stopMotors();
 }
+void CarControl::followLine(int threshold) {
+    int lineValue = getValueOfInfraredSensor(); // Assuming this method exists
+    if (lineValue < threshold) {
+        moveForward(200, 100);
+    } else {
+        turnLeft(200, 100);
+    }
+}
+
+void CarControl::stopAtLine(int threshold) {
+    if (getValueOfInfraredSensor() < threshold) {
+        stopMotors();
+    }
+}
+
+void CarControl::followLineAvoidObstacle(int threshold, int obstacleDistanceThreshold) {
+    if (getDistanceToObstacle() < obstacleDistanceThreshold) {
+        turnRight(200, 500);
+    } else {
+        followLine(threshold);
+    }
+}
+
+void CarControl::intersectionDecision(int threshold, bool (*detectIntersection)()) {
+    if (detectIntersection()) {
+        turnRight(200, 500);
+    } else {
+        followLine(threshold);
+    }
+}
+
+void CarControl::followLineUntilCondition(int threshold, unsigned long duration) {
+    unsigned long startTime = millis();
+    while (millis() - startTime < duration) {
+        followLine(threshold);
+    }
+    stopMotors();
+}
+
+void CarControl::adjustSpeedOnCurves(int threshold, bool (*isSharpCurve)(int lineValue)) {
+    int lineValue = getValueOfInfraredSensor();
+    if (isSharpCurve(lineValue)) {
+        moveForward(100, 100);
+    } else {
+        moveForward(200, 100);
+    }
+}
 
 // Function to turn the car right for a specified duration with speed
 void CarControl::turnRight(int speed, int duration) {
