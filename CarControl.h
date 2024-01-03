@@ -36,6 +36,12 @@ public:
     void lookRight();  
     void centerServo();
     void attachSensorServo(int pin);  // New method to attach the sensor servo
+    void followLine(int threshold);
+    void stopAtLine(int threshold);
+    void followLineAvoidObstacle(int threshold, int obstacleDistanceThreshold);
+    void intersectionDecision(int threshold, bool detectIntersection());
+    void followLineUntilCondition(int threshold, unsigned long duration);
+    void adjustSpeedOnCurves(int threshold, bool isSharpCurve(int lineValue));
 
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
