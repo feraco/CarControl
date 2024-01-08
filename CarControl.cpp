@@ -2,7 +2,7 @@
  * Title: CarControl.cpp
  * Author: Frederick Feraco
  * Affiliation: New York State Master Teacher
- * Description: This library provides functionalities for controlling the movement of a car 
+ * Description: This library provides functionalities for controlling the movement of a car
  * robot with an Arduino. This file contains the implementation of the CarControl class.
  */
 #include "CarControl.h"
@@ -134,7 +134,7 @@ void CarControl::moveBackward(int speed, int duration) {
 }
 
 // Function to turn the car left for a specified duration with speed
-void CarControl::turnLeft(int speed, int duration) {
+void CarControl::turnRight(int speed, int duration) {
   // Set motor directions to turn left
   digitalWrite(_ain, LOW);
   digitalWrite(_bin, HIGH);
@@ -149,56 +149,100 @@ void CarControl::turnLeft(int speed, int duration) {
   // Stop the motors
   stopMotors();
 }
-void CarControl::followLine(int threshold) {
-    int lineValue = getValueOfInfraredSensor(); // Assuming this method exists
-    if (lineValue < threshold) {
-        moveForward(200, 100);
+
+void CarControl::initLineSensors() {
+    _rightSensorPin = RIGHT_SENSOR_PIN;
+    _middleSensorPin = MIDDLE_SENSOR_PIN;
+    _leftSensorPin = LEFT_SENSOR_PIN;
+    pinMode(_rightSensorPin, INPUT);
+    pinMode(_middleSensorPin, INPUT);
+    pinMode(_leftSensorPin, INPUT);
+}
+
+void CarControl::followLineMultiSensor(int threshold) {
+    int rightValue = analogRead(_rightSensorPin);
+    int middleValue = analogRead(_middleSensorPin);
+    int leftValue = analogRead(_leftSensorPin);
+
+    if (middleValue < threshold) {
+        moveForward(200, 100); // Move forward if line is under middle sensor
+    } else if (rightValue < threshold) {
+        turnLeft(200, 100); // Turn left if line is under right sensor
+    } else if (leftValue < threshold) {
+        turnRight(200, 100); // Turn right if line is under left sensor
     } else {
-        turnLeft(200, 100);
+        stopMotors(); // Stop if no line is detected
     }
 }
 
-void CarControl::stopAtLine(int threshold) {
-    if (getValueOfInfraredSensor() < threshold) {
-        stopMotors();
+void CarControl::followLine(int threshold) {
+    int leftValue = analogRead(_leftSensorPin);
+    int middleValue = analogRead(_middleSensorPin);
+    int rightValue = analogRead(_rightSensorPin);
+
+    if (leftValue > threshold && middleValue > threshold && rightValue > threshold) {
+        // All sensors are on the line
+        moveForward(200, 100); // Adjust speed and duration as needed
+    } else {
+        // Adjust the direction based on which sensor is off the line
+        if (leftValue <= threshold) {
+            // Left sensor is off the line, turn right
+            turnRight(150, 20); // Adjust turn speed and duration
+        } else if (rightValue <= threshold) {
+            // Right sensor is off the line, turn left
+            turnLeft(150, 20); // Adjust turn speed and duration
+        }
+        // Add additional logic here if needed, e.g., for the middle sensor
     }
 }
+
+
+
+
+void CarControl::stopAtLine(int threshold) {
+    int leftValue = analogRead(_leftSensorPin);
+    int middleValue = analogRead(_middleSensorPin);
+    int rightValue = analogRead(_rightSensorPin);
+
+    if ( middleValue < threshold ) {
+        stopMotors(); // Stop when a line is detected by any sensor
+    }
+}
+
 
 void CarControl::followLineAvoidObstacle(int threshold, int obstacleDistanceThreshold) {
     if (getDistanceToObstacle() < obstacleDistanceThreshold) {
-        turnRight(200, 500);
+        turnRight(200, 500); // Turn right to avoid obstacle
     } else {
-        followLine(threshold);
+        followLine(threshold); // Continue following the line
     }
 }
 
+
 void CarControl::intersectionDecision(int threshold, bool (*detectIntersection)()) {
     if (detectIntersection()) {
-        turnRight(200, 500);
+        turnRight(200, 500); // Execute a turn at the intersection
     } else {
-        followLine(threshold);
+        followLine(threshold); // Continue following the line
     }
 }
 
 void CarControl::followLineUntilCondition(int threshold, unsigned long duration) {
     unsigned long startTime = millis();
     while (millis() - startTime < duration) {
-        followLine(threshold);
+        followLine(threshold); // Follow line for the specified duration
     }
     stopMotors();
 }
 
-void CarControl::adjustSpeedOnCurves(int threshold, bool (*isSharpCurve)(int lineValue)) {
-    int lineValue = getValueOfInfraredSensor();
-    if (isSharpCurve(lineValue)) {
-        moveForward(100, 100);
-    } else {
-        moveForward(200, 100);
-    }
-}
+
+
+
+
+
 
 // Function to turn the car right for a specified duration with speed
-void CarControl::turnRight(int speed, int duration) {
+void CarControl::turnLeft(int speed, int duration) {
   // Set motor directions to turn right
   digitalWrite(_ain, HIGH);
   digitalWrite(_bin, LOW);
