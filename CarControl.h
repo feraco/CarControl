@@ -2,13 +2,15 @@
  * Title: CarControl.cpp
  * Author: Frederick Feraco
  * Affiliation: New York State Master Teacher
- * Description: This library provides functionalities for controlling the movement of a car 
+ * Description: This library provides functionalities for controlling the movement of a car
  * robot with an Arduino. This file contains the implementation of the CarControl class.
  */
 // Additional includes for sensor readings
 #ifndef CarControl_h
 #define CarControl_h
-
+#define RIGHT_SENSOR_PIN A0   // Right sensor
+#define MIDDLE_SENSOR_PIN A1  // Middle sensor
+#define LEFT_SENSOR_PIN A2    // Left sensor
 #include "Arduino.h"
 #include <Ultrasonic.h>  // Include for Ultrasonic sensor
 #include <Servo.h>  // Include the Servo library
@@ -33,7 +35,7 @@ public:
     void moveSlowForward(int duration, int speed);  // Corrected line
     void customMovement(bool forwardA, bool forwardB, int speedA, int speedB, int duration);
     void lookLeft();              // Function to make the ultrasonic sensor look left
-    void lookRight();  
+    void lookRight();
     void centerServo();
     void attachSensorServo(int pin);  // New method to attach the sensor servo
     void followLine(int threshold);
@@ -41,7 +43,8 @@ public:
     void followLineAvoidObstacle(int threshold, int obstacleDistanceThreshold);
     void intersectionDecision(int threshold, bool detectIntersection());
     void followLineUntilCondition(int threshold, unsigned long duration);
-    void adjustSpeedOnCurves(int threshold, bool isSharpCurve(int lineValue));
+    void initLineSensors(); // Initialize line following sensors
+    void followLineMultiSensor(int threshold); // Line following for multiple sensors
 
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
@@ -61,6 +64,7 @@ private:
     static const int _trigPin = 13;    // Ultrasonic sensor trigger pin
     static const int _echoPin = 12;   // Ultrasonic sensor echo pin
     static const int _irSensorPin = A0; // IR sensor pin
+    int _leftSensorPin, _middleSensorPin, _rightSensorPin; // Pins for the line sensors
 
     // Ultrasonic sensor instance
     Ultrasonic _ultrasonic = Ultrasonic(_trigPin, _echoPin);
