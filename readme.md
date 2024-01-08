@@ -62,6 +62,35 @@ The Car Control Library provides you with a suite of functions to control the ca
    - **Parameters**:
      - `duration`: Duration in milliseconds.
    - **Example**: `car.moveSlowForward(3000);` moves the car forward slowly for 3 seconds.
+### Additional Functions for CarControl Library Documentation:
+
+9. **Follow Line**
+   - **Signature**: `car.followLine(threshold);`
+   - **Description**: Adjusts the car's movement to follow a line based on sensor readings.
+   - **Parameters**:
+     - `threshold`: Value against which sensor readings are compared to detect the line.
+   - **Example**: `car.followLine(1000);` adjusts the car's movement to follow a line, assuming sensor values above 1000 indicate the line's presence.
+
+10. **Stop At Line**
+    - **Signature**: `car.stopAtLine(threshold);`
+    - **Description**: Stops the car when a line is detected by any sensor.
+    - **Parameters**:
+      - `threshold`: Value against which sensor readings are compared to detect the line.
+    - **Example**: `car.stopAtLine(1000);` stops the car when any sensor detects a line with a value below 1000.
+
+#### Implementing Line Following and Stopping
+
+The `followLine` and `stopAtLine` functions are essential for tasks like line following and stopping at specific points. Here's a detailed description of each function's behavior:
+
+**Follow Line**
+
+This function makes the car continuously adjust its direction to stay on a line. The car moves forward if all sensors detect the line. If a sensor detects the line is veering off to one side (indicated by a value lower than the threshold), the car will adjust its direction by turning slightly towards the opposite side. This function is particularly useful in situations where the line may curve or not be perfectly straight.
+
+**Stop At Line**
+
+`stopAtLine` is used for scenarios where the car needs to halt upon encountering a line, such as at an intersection or a designated stopping point. The function checks if any of the line sensors detect a value below the specified threshold, which indicates the presence of a line. Upon detection, the car's motors are stopped, bringing the car to a halt.
+
+Both functions rely on accurate sensor readings and may require calibration of the threshold value based on the specific characteristics of the line and the sensors.
 
 ### Custom Movement
 - **Signature**: `car.customMovement(forwardA, forwardB, speedA, speedB, duration)`
