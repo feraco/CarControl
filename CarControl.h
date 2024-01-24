@@ -12,6 +12,8 @@
 #define MIDDLE_SENSOR_PIN A1  // Middle sensor
 #define LEFT_SENSOR_PIN A2    // Left sensor
 #include "Arduino.h"
+#define RGB_LED_PIN 4
+#include <FastLED.h>     //
 #include <Ultrasonic.h>  // Include for Ultrasonic sensor
 #include <Servo.h>  // Include the Servo library
 
@@ -19,7 +21,9 @@ class CarControl {
 public:
     // Constructor
     CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeSwitch);
-
+    int getLeftDistance();
+        int getRightDistance();
+        int getCenterDistance();
     // Setup and movement functions
     void setup();
     void moveForward(int speed, int duration);
@@ -51,6 +55,8 @@ public:
     int getDistanceToObstacle(); // Measures the distance to an obstacle
     int getValueOfInfraredSensor(); // Reads the value of the infrared sensor
   //  void checkIfCarWasPickedUp(); // Checks if the car was picked up
+    void lightRGBForDuration(CRGB color, int duration);
+
 
 private:
     // Motor control variables
@@ -65,6 +71,7 @@ private:
     static const int _echoPin = 12;   // Ultrasonic sensor echo pin
     static const int _irSensorPin = A0; // IR sensor pin
     int _leftSensorPin, _middleSensorPin, _rightSensorPin; // Pins for the line sensors
+    int _redValue, _greenValue, _blueValue;  // Variables to store RGB values
 
     // Ultrasonic sensor instance
     Ultrasonic _ultrasonic = Ultrasonic(_trigPin, _echoPin);
