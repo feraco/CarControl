@@ -12,8 +12,13 @@
 // Define pins for Ultrasonic sensor
 #define TRIG_PIN 13
 #define ECHO_PIN 12
+#include <FastLED.h>
 
-// Initialize the ultrasonic sensor
+// Define the number of LEDs and the data pin for the RGB LED
+#define NUM_LEDS 1
+#define DATA_PIN 4
+
+CRGB leds[NUM_LEDS];// Initialize the ultrasonic sensor
 Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
 
 // Define pin for Infrared sensor
@@ -34,6 +39,7 @@ CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeS
      _obstacleInFront = false;
   //   _carWasPickedUp = false;
    // myServo.attach(SERVO_PIN);
+    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     centerServo();
 }
 
@@ -58,12 +64,29 @@ void CarControl::setup() {
   pinMode(_bin, OUTPUT);
   pinMode(_ain, OUTPUT);
   pinMode(_stby, OUTPUT);
+    FastLED.setBrightness(50);  // Set initial brightness
 
   // Set the motor pins to LOW and standby pin to HIGH
   digitalWrite(_pwma, LOW);
   digitalWrite(_stby, HIGH);
 }
+int CarControl::getLeftDistance() {
+    lookLeft();  // Assuming you have a method to position the servo left
+    delay(500);
+    return getDistanceToObstacle();  // Assuming you have a method to get distance
+}
 
+int CarControl::getRightDistance() {
+    lookRight(); // Assuming you have a method to position the servo right
+    delay(500);
+    return getDistanceToObstacle();  // Assuming you have a method to get distance
+}
+
+int CarControl::getCenterDistance() {
+    centerServo(); // Assuming you have a method to position the servo center
+    delay(500);
+    return getDistanceToObstacle();  // Assuming you have a method to get distance
+}
 // Function to check for an obstacle in front
 void CarControl::checkObstacleInFront() {
     long distance = ultrasonic.distanceRead();  // Updated function call
@@ -95,7 +118,13 @@ void CarControl::lookLeft() {
 void CarControl::lookRight() {
     _sensorServo.write(180); // Adjust this angle as needed for your setup
 }
-
+void CarControl::lightRGBForDuration(CRGB color, int duration) {
+  leds[0] = color;
+  FastLED.show();
+  delay(duration);
+  leds[0] = CRGB::Black; // Turn off the LED after the duration
+  FastLED.show();
+}
 void CarControl::centerServo() {
     _sensorServo.write(90); // Assuming 90 degrees is the center position
 }
@@ -135,9 +164,9 @@ void CarControl::moveBackward(int speed, int duration) {
 
 // Function to turn the car left for a specified duration with speed
 void CarControl::turnRight(int speed, int duration) {
-  // Set motor directions to turn left
-  digitalWrite(_ain, LOW);
-  digitalWrite(_bin, HIGH);
+  // Set motor directions to turn right (opposite of left turn)
+  digitalWrite(_ain, LOW);  // Motor A forward
+  digitalWrite(_bin, HIGH); // Motor B backward
 
   // Set motor power to the specified speed
   analogWrite(_pwma, speed);
@@ -244,8 +273,8 @@ void CarControl::followLineUntilCondition(int threshold, unsigned long duration)
 // Function to turn the car right for a specified duration with speed
 void CarControl::turnLeft(int speed, int duration) {
   // Set motor directions to turn right
-  digitalWrite(_ain, HIGH);
-  digitalWrite(_bin, LOW);
+  digitalWrite(_ain, LOW);
+  digitalWrite(_bin, HIGH);
 
   // Set motor power to the specified speed
   analogWrite(_pwma, speed);
