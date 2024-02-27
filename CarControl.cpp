@@ -96,7 +96,14 @@ void CarControl::checkObstacleInFront() {
         _obstacleInFront = false;
     }
 }
-
+float CarControl::getBatteryLevel() {
+    int sensorValue = analogRead(_batteryPin); // Read the analog value from battery pin
+    float voltage = sensorValue * (5.0 / 1023.0) * ((10 + 1.5) / 1.5); // Convert to voltage
+    // Calculate battery percentage
+    float batteryPercentage = (voltage - _batteryMinVoltage) / (_batteryMaxVoltage - _batteryMinVoltage) * 100;
+    batteryPercentage = constrain(batteryPercentage, 0, 100); // Constrain between 0 to 100%
+    return batteryPercentage;
+}
 
 // Function to get the distance to the nearest obstacle
 int CarControl::getDistanceToObstacle() {
