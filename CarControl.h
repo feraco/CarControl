@@ -29,7 +29,6 @@ public:
     void setup();
     void moveForward(int speed, int duration);
     float getBatteryLevel();
-    float getBatteryVoltage();
 
     void moveBackward(int speed, int duration);
     void turnLeft(int speed, int duration);
@@ -53,7 +52,9 @@ public:
     void followLineUntilCondition(int threshold, unsigned long duration);
     void initLineSensors(); // Initialize line following sensors
     void followLineMultiSensor(int threshold); // Line following for multiple sensors
-
+    int getLineSensorLeft();
+    int getLineSensorMiddle();
+    int getLineSensorRight();
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
     int getDistanceToObstacle(); // Measures the distance to an obstacle
@@ -76,7 +77,6 @@ private:
     static const int _irSensorPin = A0; // IR sensor pin
     int _leftSensorPin, _middleSensorPin, _rightSensorPin; // Pins for the line sensors
     int _redValue, _greenValue, _blueValue;  // Variables to store RGB values
-
     static const int _batteryPin = A3; // Battery voltage pin
     const float _batteryMaxVoltage = 8.4; // Adjust based on your battery
     const float _batteryMinVoltage = 6.0; // Adjust based on your battery
