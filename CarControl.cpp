@@ -194,7 +194,11 @@ void CarControl::initLineSensors() {
     pinMode(_middleSensorPin, INPUT);
     pinMode(_leftSensorPin, INPUT);
 }
-
+float CarControl::getBatteryVoltage() {
+    int sensorValue = analogRead(_batteryPin); // Read the analog value
+    float voltage = sensorValue * (5.0 / 1023.0) * ((10 + 1.5) / 1.5); // Convert to voltage, adjust based on your voltage divider
+    return voltage;
+}
 void CarControl::followLineMultiSensor(int threshold) {
     int rightValue = analogRead(_rightSensorPin);
     int middleValue = analogRead(_middleSensorPin);
