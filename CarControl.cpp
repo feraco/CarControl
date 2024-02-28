@@ -70,6 +70,19 @@ void CarControl::setup() {
   digitalWrite(_pwma, LOW);
   digitalWrite(_stby, HIGH);
 }
+
+int CarControl::getLineSensorLeft() {
+    return analogRead(A2); // Left sensor on pin A2
+}
+
+int CarControl::getLineSensorMiddle() {
+    return analogRead(A1); // Middle sensor on pin A1
+}
+
+int CarControl::getLineSensorRight() {
+    return analogRead(A0); // Right sensor on pin A0
+}
+
 int CarControl::getLeftDistance() {
     lookLeft();  // Assuming you have a method to position the servo left
     delay(500);
@@ -194,11 +207,7 @@ void CarControl::initLineSensors() {
     pinMode(_middleSensorPin, INPUT);
     pinMode(_leftSensorPin, INPUT);
 }
-float CarControl::getBatteryVoltage() {
-    int sensorValue = analogRead(_batteryPin); // Read the analog value
-    float voltage = sensorValue * (5.0 / 1023.0) * ((10 + 1.5) / 1.5); // Convert to voltage, adjust based on your voltage divider
-    return voltage;
-}
+
 void CarControl::followLineMultiSensor(int threshold) {
     int rightValue = analogRead(_rightSensorPin);
     int middleValue = analogRead(_middleSensorPin);
