@@ -135,7 +135,16 @@ Both functions rely on accurate sensor readings and may require calibration of t
    - `car.closeClaw();`
    - **Description**: Closes the claw.
    - **Example**: `car.closeClaw();` closes the claw.
-### Examples:
+### Get Battery Level
 
-- `BasicMovements.ino`: Demonstrates the basic movements of the car.
-- `LoopMovements.ino`: Demonstrates looped sequences of actions.
+1. ## car.getBatteryLevel();
+   - ** Description: Retrieves the current battery level as a percentage.
+**Returns: Battery level percentage (0-100%).
+**Example: float batteryLevel = car.getBatteryLevel(); gets the current battery level percentage.
+Get Battery Voltage
+
+## car.getBatteryVoltage();
+** Description: Measures the current battery voltage.
+Returns: Battery voltage in volts.
+Example: float voltage = car.getBatteryVoltage(); measures and returns the current battery voltage.
+
