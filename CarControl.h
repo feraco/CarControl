@@ -55,6 +55,10 @@ public:
     int getLineSensorLeft();
     int getLineSensorMiddle();
     int getLineSensorRight();
+    void playStarWars();
+
+    void attachBuzzer(int buzzerPin);  // Attach the buzzer to a pin
+    void beep(int pattern);            // Function to control beep patterns
     // New functionalities
     void checkObstacleInFront(); // Checks if there's an obstacle in front
     int getDistanceToObstacle(); // Measures the distance to an obstacle
@@ -70,7 +74,9 @@ private:
     // New private member variables
     bool _obstacleInFront; // Flag for obstacle detection
     //bool _carWasPickedUp; // Flag for detecting if car was picked up
-
+    int _buzzerPin;                    // Pin where the buzzer is attached
+      void singleBeep();                 // Single beep pattern
+      void doubleBeep();                 // Double beep pattern
     // Sensor pins (if required, can be adjusted)
     static const int _trigPin = 13;    // Ultrasonic sensor trigger pin
     static const int _echoPin = 12;   // Ultrasonic sensor echo pin
