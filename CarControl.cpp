@@ -23,6 +23,46 @@ Ultrasonic ultrasonic(TRIG_PIN, ECHO_PIN);
 
 // Define pin for Infrared sensor
 #define IR_SENSOR_PIN A0
+// Define notes for the Star Wars theme
+#define NOTE_A4  440
+#define NOTE_E4  330
+#define NOTE_F4  349
+#define NOTE_C4  261
+#define NOTE_G4  392
+#define NOTE_F5  698
+#define NOTE_E5  659
+#define NOTE_A5  880
+#define NOTE_G5  784
+#define NOTE_D5  587
+#define NOTE_D4  294
+#define NOTE_C5  523
+#define NOTE_GS4 415
+
+
+// Define the duration of notes
+int noteDurations[] = {500, 500, 500, 350, 150, 500, 500, 500, 650, 150, 500};
+
+void CarControl::playStarWars() {
+    int melody[] = {
+        NOTE_A4, NOTE_A4, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4,
+        NOTE_E5, NOTE_E5, NOTE_E5, NOTE_F5, NOTE_C5, NOTE_GS4, NOTE_F4, NOTE_C5, NOTE_A4
+    };
+
+    // iterate over the notes of the melody:
+    for (int thisNote = 0; thisNote < 18; thisNote++) {
+        // to calculate the note duration, take one second divided by the note type.
+        // e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
+        int noteDuration = 1000 / noteDurations[thisNote];
+        tone(_buzzerPin, melody[thisNote], noteDuration);
+
+        // to distinguish the notes, set a minimum time between them.
+        // the note's duration + 30% seems to work well:
+        int pauseBetweenNotes = noteDuration * 1.30;
+        delay(pauseBetweenNotes);
+        // stop the tone playing:
+        noTone(_buzzerPin);
+    }
+}
 
 // Class variables for new functionalities
 bool _obstacleInFront;
@@ -43,7 +83,37 @@ CarControl::CarControl(int pwma, int pwmb, int ain, int bin, int stby, int modeS
     centerServo();
 }
 
+void CarControl::attachBuzzer(int buzzerPin = 11) {
+  _buzzerPin = buzzerPin;
+  pinMode(_buzzerPin, OUTPUT);
+}
 
+void CarControl::beep(int pattern) {
+  switch (pattern) {
+    case 1:
+      singleBeep();
+      break;
+    case 2:
+      doubleBeep();
+      break;
+    // Additional cases for more patterns...
+  }
+}
+
+void CarControl::singleBeep() {
+  digitalWrite(_buzzerPin, HIGH);
+  delay(100); // 100 ms beep
+  digitalWrite(_buzzerPin, LOW);
+}
+
+void CarControl::doubleBeep() {
+  for (int i = 0; i < 2; i++) {
+    digitalWrite(_buzzerPin, HIGH);
+    delay(100);
+    digitalWrite(_buzzerPin, LOW);
+    delay(100);
+  }
+}
 void CarControl::attachClaw(int pin) {
     _clawServoPin = pin;
     _clawServo.attach(_clawServoPin); // Attach the servo to the specified pin
