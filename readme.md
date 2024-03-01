@@ -147,4 +147,76 @@ Get Battery Voltage
 ** Description: Measures the current battery voltage.
 Returns: Battery voltage in volts.
 Example: float voltage = car.getBatteryVoltage(); measures and returns the current battery voltage.
+### Function Descriptions with Examples:
+
+1. **playStarWars()**
+   - **Description**: Plays the Star Wars theme tune using a buzzer attached to the car.
+   - **Example Usage**: `car.playStarWars();`
+
+2. **attachBuzzer(int pin)**
+   - **Description**: Attaches a buzzer to a specified pin for audio output.
+   - **Parameters**: `pin` - The pin number where the buzzer is connected.
+   - **Example Usage**: `car.attachBuzzer(10);`
+
+3. **beep(int count), singleBeep(), doubleBeep()**
+   - **Description**: Controls buzzer patterns to emit single, double, or a specified number of beeps.
+   - **Example Usage**:
+     - `car.beep(1);` // Emits a single beep.
+     - `car.singleBeep();` // Emits a single beep.
+     - `car.doubleBeep();` // Emits two beeps in quick succession.
+
+4. **attachSensorServo(int pin)**
+   - **Description**: Attaches a servo motor to a pin for moving sensors, like ultrasonic or infrared, to scan the environment.
+   - **Parameters**: `pin` - The pin number where the servo motor is connected.
+   - **Example Usage**: `car.attachSensorServo(9);`
+
+5. **lookLeft(), lookRight(), centerServo()**
+   - **Description**: Controls the servo's position to turn sensors left, right, or bring them to the center.
+   - **Example Usage**: `car.lookLeft();` // Turns the sensor left.
+
+6. **lightRGBForDuration(CRGB color, int duration)**
+   - **Description**: Lights an RGB LED with a specified color for a set duration.
+   - **Parameters**:
+     - `color`: The color to set the LED.
+     - `duration`: How long the LED should be lit (in milliseconds).
+   - **Example Usage**: `car.lightRGBForDuration(CRGB::Red, 1000);` // Lights up red for 1 second.
+
+7. **getLineSensorLeft(), getLineSensorMiddle(), getLineSensorRight()**
+   - **Description**: Retrieves line sensor readings from the left, middle, or right sensor.
+   - **Example Usage**: `int leftValue = car.getLineSensorLeft();` // Gets left sensor reading.
+
+8. **getLeftDistance(), getRightDistance(), getCenterDistance()**
+   - **Description**: Gets distance readings from the left, right, or center distance sensors.
+   - **Example Usage**: `int distance = car.getLeftDistance();` // Gets distance from the left sensor.
+
+9. **followLineMultiSensor(int threshold)**
+   - **Description**: Enhanced line following functionality using multiple sensors.
+   - **Parameters**: `threshold` - The sensor value threshold for detecting the line.
+   - **Example Usage**: `car.followLineMultiSensor(500);`
+
+10. **followLineUntilCondition(int threshold, unsigned long duration)**
+    - **Description**: Follows a line for a specified duration or until a condition is met.
+    - **Parameters**:
+      - `threshold`: The sensor value threshold for detecting the line.
+      - `duration`: How long to follow the line (in milliseconds).
+    - **Example Usage**: `car.followLineUntilCondition(500, 10000);` // Follows for 10 seconds.
+
+11. **intersectionDecision(int threshold, bool (*decisionFunction)())**
+    - **Description**: Makes decisions at intersections during line following based on a user-defined function.
+    - **Parameters**:
+      - `threshold`: The sensor value threshold for detecting the line.
+      - `decisionFunction`: A pointer to a function that determines the action at intersections.
+    - **Example Usage**: `car.intersectionDecision(500, detectIntersection);` // Uses a custom function to decide at intersections.
+
+12. **initLineSensors()**
+    - **Description**: Initializes the pins for the line sensors.
+    - **Example Usage**: `car.initLineSensors();`
+
+13. **customMovement(bool forward, bool backward, int speedLeft, int speedRight, int duration)**
+    - **Description**: Allows for custom movement patterns by specifying directions and speeds for each motor.
+    - **Parameters**:
+      - `forward`: Set to true to move forward.
+      - `backward`: Set to true to move backward.
+      - `speedLeft`: Speed for the left motor.
+      - `speedRight`: Speed for the right motor.
 
