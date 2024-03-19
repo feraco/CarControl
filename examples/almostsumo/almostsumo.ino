@@ -28,38 +28,45 @@ void setup() {
   // Set initial state of the car
   car.stopMotors(); // Ensure the car is stationary at startup
 }
-
-
 void loop() {
-  // Check for obstacles in front of the robot
-  car.checkObstacleInFront();
+  // Line sensor readings
+  int leftSensor = car.getLineSensorLeft();
+  int middleSensor = car.getLineSensorMiddle();
+  int rightSensor = car.getLineSensorRight();
 
-  // If an obstacle is detected, stop the robot
-  if (car.getDistanceToObstacle() < 10) {
-    car.stopMotors();
+  // Threshold for detecting the black line
+  int lineThreshold = 120; // Adjusted based on your sensor readings
+
+  // Check for the opponent
+  int distanceToOpponent = car.getDistanceToObstacle();
+  if (distanceToOpponent < 15) {
+    car.lightRGBForDuration(CRGB::Red, 500); // Red for aggressive forward movement
+    car.moveForward(255, 50); // Move forward at full speed
   } else {
-    // Move the robot forward at full speed
-    car.moveForward(255, 100);
-
-    // If a black line is detected, stop the robot, move backwards, turn around, and then move forward again at full speed
-    if (car.getLineSensorMiddle() < 1000) {
-      car.stopMotors();
-      car.moveBackward(255, 100);
-      car.turnAround();
-      car.moveForward(255, 100);
-    }
-
-    // Check for other bots using the ultrasonic sensor
-    int distanceToBot = car.getDistanceToObstacle();
-
-    // If another bot is detected, push it out of the ring
-    if (distanceToBot < 10) {
-      car.turnRight(255, 100);
-      car.moveForward(255, 100);
-      car.turnLeft(255, 100);
+    // Determine the robot's movement based on the sensor readings
+    if (middleSensor < lineThreshold) {
+      // Middle sensor detects white surface - move forward
+     // car.lightRGBForDuration(CRGB::Green, 500);
+      car.moveForward(200, 50);
+    } else {
+      // Middle sensor detects black line - adjust direction
+      if (leftSensor > lineThreshold) {
+        // Left sensor detects white - turn left
+        car.lightRGBForDuration(CRGB::Yellow, 500);
+        car.turnLeft(200, 400);
+      } else if (rightSensor > lineThreshold) {
+        // Right sensor detects white - turn right
+        car.lightRGBForDuration(CRGB::Blue, 500);
+        car.turnRight(200, 400);
+      } else {
+        // All sensors detect black - back up and turn around
+        car.lightRGBForDuration(CRGB::Purple, 500);
+        car.moveBackward(200, 100);
+        car.turnAround();
+      }
     }
   }
 
-  // Delay for 100 milliseconds before the next loop iteration
-  delay(100);
+  // Reset LED color to black after each action
+  car.lightRGBForDuration(CRGB::Black, 500);
 }
