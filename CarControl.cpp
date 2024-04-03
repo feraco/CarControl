@@ -363,8 +363,8 @@ void CarControl::followLineUntilCondition(int threshold, unsigned long duration)
 // Function to turn the car right for a specified duration with speed
 void CarControl::turnLeft(int speed, int duration) {
   // Set motor directions to turn right
-  digitalWrite(_ain, LOW);
-  digitalWrite(_bin, HIGH);
+  digitalWrite(_ain, HIGH);
+  digitalWrite(_bin, LOW);
 
   // Set motor power to the specified speed
   analogWrite(_pwma, speed);
