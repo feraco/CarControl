@@ -1,0 +1,267 @@
+=============================================================================
+  LESSON 10: OBSTACLE DETECTION AND AVOIDANCE
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+This is where it all comes together! Your robot can move, turn, scan,
+and grab. Now you'll combine everything into a robot that can navigate
+on its own - detecting obstacles and choosing the best path around them.
+This is the core of autonomous robotics!
+
+Time Required: 75-90 minutes
+Difficulty: Intermediate-Advanced
+Prerequisites: Lessons 01-09
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Implement the "sense-think-act" cycle
+  2. Create continuous obstacle avoidance behavior
+  3. Handle different obstacle scenarios
+  4. Adjust robot speed based on distance
+  5. Build an autonomous navigation program
+
+
+VOCABULARY
+==========
+  Autonomous  - Operating independently, without human control.
+                An autonomous robot makes its own decisions.
+
+  Sense-Think - The fundamental cycle of autonomous robots:
+  -Act cycle    SENSE: Read sensors
+                THINK: Process data and make decisions
+                ACT: Execute movements
+                (Then repeat!)
+
+  Algorithm   - A step-by-step problem-solving procedure.
+                Your obstacle avoidance code is an algorithm.
+
+  Adaptive    - Changing behavior based on conditions. Going fast
+                when the path is clear, slow when obstacles are near.
+
+  Constant    - A value that doesn't change during the program.
+                Like SAFE_DISTANCE - once set, it stays the same.
+
+
+THE SENSE-THINK-ACT CYCLE
+===========================
+This is the MOST IMPORTANT concept in robotics:
+
+  SENSE (gather information):
+    int centerDist = car.getCenterDistance();  // What's ahead?
+
+  THINK (make a decision):
+    if(centerDist < 25) {
+      // Obstacle detected! Need to find another way.
+      int leftDist = car.getLeftDistance();
+      int rightDist = car.getRightDistance();
+      // Which way has more space?
+    }
+
+  ACT (execute the decision):
+    if(leftDist > rightDist) {
+      car.turnLeft(150, 500);     // More space on left
+    } else {
+      car.turnRight(150, 500);    // More space on right
+    }
+
+  REPEAT: Go back to SENSE and do it all again!
+
+  This cycle runs continuously, making the robot seem "intelligent."
+  In reality, it's just reading numbers and following your rules.
+  But to an observer, it looks like the robot is thinking!
+
+
+USING CONSTANTS FOR CONFIGURATION
+===================================
+At the top of your program, define constants for easy tuning:
+
+  const int SAFE_DISTANCE = 25;   // Minimum safe distance in cm
+  const int MOVE_SPEED = 150;     // Speed for normal movement
+  const int SCAN_DELAY = 600;     // Wait time after servo moves
+
+Why use constants?
+  1. Easy to change - just modify one number at the top
+  2. Self-documenting - SAFE_DISTANCE is clearer than just "25"
+  3. Consistent - every place that uses SAFE_DISTANCE uses the
+     same value
+
+The "const" keyword means this value CANNOT be changed during
+the program. It's like writing a rule in permanent marker.
+
+
+ADAPTIVE SPEED
+===============
+Smart robots go fast when it's safe and slow when it's dangerous:
+
+  if(centerDist > 60) {
+    car.moveForward(220, 300);     // Far away = FAST
+  } else if(centerDist > 40) {
+    car.moveForward(160, 300);     // Medium = MEDIUM SPEED
+  } else if(centerDist > 25) {
+    car.moveForward(100, 300);     // Getting close = SLOW
+  } else {
+    // Too close! Stop and find another way
+    car.stopMotors();
+  }
+
+This is like driving a car:
+  Highway with no traffic = drive fast
+  Neighborhood with parked cars = drive medium
+  Parking lot = drive slow
+  About to hit something = STOP!
+
+
+HANDLING DIFFERENT SCENARIOS
+=============================
+
+  Scenario 1: Obstacle straight ahead, clear on left
+    Action: Turn left and continue
+
+  Scenario 2: Obstacle straight ahead, clear on right
+    Action: Turn right and continue
+
+  Scenario 3: Obstacles ahead AND on left, clear on right
+    Action: Turn right
+
+  Scenario 4: Obstacles ahead AND on right, clear on left
+    Action: Turn left
+
+  Scenario 5: Obstacles in ALL directions (trapped!)
+    Action: Back up, then turn around (180 degrees)
+
+  Handle ALL scenarios to make your robot robust:
+    if(leftDist > rightDist && leftDist > SAFE_DISTANCE) {
+      car.turnLeft(150, 500);          // Turn left
+    } else if(rightDist > SAFE_DISTANCE) {
+      car.turnRight(150, 500);         // Turn right
+    } else {
+      // Both blocked! Emergency maneuver
+      car.moveBackward(150, 500);      // Back up
+      delay(300);
+      car.turnRight(150, 1000);        // Turn around
+    }
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int SAFE_DISTANCE = 25;
+  int centerDist, leftDist, rightDist;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 10: Obstacle Detection");
+    car.setup();
+    car.attachSensorServo(10);
+    car.centerServo();
+    Serial.println("Place obstacles around the robot!");
+    delay(3000);
+  }
+
+  void loop() {
+    // 10-second autonomous navigation
+    Serial.println("Starting 10-second navigation...");
+
+    unsigned long startTime = millis();
+    while(millis() - startTime < 10000) {
+
+      // SENSE
+      centerDist = car.getCenterDistance();
+
+      // THINK & ACT
+      if(centerDist < SAFE_DISTANCE) {
+        Serial.println("Obstacle! Scanning...");
+        car.stopMotors();
+
+        leftDist = car.getLeftDistance();
+        rightDist = car.getRightDistance();
+        car.centerServo();
+
+        if(leftDist > rightDist && leftDist > SAFE_DISTANCE) {
+          Serial.println("-> Going left");
+          car.turnLeft(150, 500);
+        } else if(rightDist > SAFE_DISTANCE) {
+          Serial.println("-> Going right");
+          car.turnRight(150, 500);
+        } else {
+          Serial.println("-> Backing up and turning around");
+          car.moveBackward(150, 500);
+          delay(300);
+          car.turnRight(150, 1000);
+        }
+      } else {
+        car.moveForward(150, 200);  // Path clear
+      }
+
+      delay(100);
+    }
+
+    car.stopMotors();
+    Serial.println("Navigation complete!");
+    delay(5000);
+  }
+
+
+NEW CONCEPT: millis() FOR TIMING
+==================================
+  millis() returns the number of milliseconds since the program started.
+  We use it to run code for a specific amount of time:
+
+  unsigned long startTime = millis();    // Record start time
+  while(millis() - startTime < 10000) {  // Keep going for 10 seconds
+    // Your code here runs for exactly 10 seconds
+  }
+
+  Why not just use delay(10000)?
+  Because delay() pauses EVERYTHING - the robot can't check sensors
+  during a delay. With millis(), the robot keeps sensing and acting
+  the entire time!
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Obstacle Course Navigator
+
+  Set up a course with 4-6 obstacles (boxes, bottles, etc.)
+  in a rectangular area.
+
+  Your robot must:
+    1. Navigate from start to finish without touching any obstacle
+    2. Run for 20 seconds
+    3. Print how many obstacles it avoided
+    4. Use adaptive speed (fast when clear, slow when close)
+
+  Requirements:
+    - Configure SAFE_DISTANCE at the top of your program
+    - Print clear status messages
+    - Handle the "trapped" scenario (all directions blocked)
+    - Count and report obstacles avoided
+
+  Bonus:
+    - Add a "speed mode" that adjusts based on distance
+    - Add a stuck detector (if no forward progress for 3 seconds)
+    - Keep track of total time spent moving forward vs. turning
+
+
+TEACHER NOTES
+=============
+  - Set up obstacle courses before class
+  - Have students compete: who can avoid the most obstacles?
+  - Discuss: What makes a good obstacle avoidance algorithm?
+  - Connect to autonomous vehicles and self-driving technology
+  - Adjust SAFE_DISTANCE based on the course spacing
+
+=============================================================================
+  END OF LESSON 10
+=============================================================================

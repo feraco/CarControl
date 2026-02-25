@@ -1,0 +1,257 @@
+=============================================================================
+  LESSON 02: GOING BACKWARD
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Now that you can make the robot go forward, it's time to learn how to
+go backward! You'll also learn to combine forward and backward movements
+to create fun patterns, like making the robot "dance."
+
+Time Required: 45-60 minutes
+Difficulty: Beginner
+Prerequisite: Lesson 01 (Forward Movement)
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Make the robot move backward
+  2. Understand the difference between forward and backward motor direction
+  3. Combine forward and backward movements in one program
+  4. Create movement sequences with different speeds
+
+
+VOCABULARY
+==========
+  Sequence    - A series of steps that happen one after another, in order.
+                Like following a recipe step by step.
+
+  Direction   - Which way the motors spin. Forward or backward.
+                The motors can spin either way.
+
+  Pattern     - A set of movements that repeat or create a design.
+                Like a dance routine.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  moveBackward(speed, duration)
+  -----------------------------
+  What it does:  Makes the robot drive backward (in reverse).
+
+  How to use it: car.moveBackward(speed, duration);
+
+  Parameters:
+    speed    - A number from 0 to 255 (same as forward)
+               0 = not moving
+               100 = slow reverse
+               180 = medium reverse
+               255 = full speed reverse
+
+    duration - How long to move backward, in milliseconds
+               1000 = one second backward
+
+  Example:     car.moveBackward(150, 1500);
+               This makes the robot go backward at medium speed for
+               1.5 seconds.
+
+  How it works under the hood:
+    When you call moveForward(), both motors spin in one direction.
+    When you call moveBackward(), both motors spin the OPPOSITE way.
+    It's the same motors doing the same thing, just reversed.
+
+  Real-world comparison:
+    A car has Drive (D) and Reverse (R) gears. moveForward() is like
+    Drive, and moveBackward() is like Reverse. Same engine, different
+    direction.
+
+
+COMMANDS FROM LESSON 01 (REVIEW)
+=================================
+
+  moveForward(speed, duration)  - Drive forward
+  stopMotors()                  - Stop all movement
+  delay(milliseconds)           - Pause the program
+
+
+COMBINING FORWARD AND BACKWARD
+================================
+The real power comes from combining movements! You can:
+
+  1. Move forward, then backward (like "there and back")
+  2. Alternate directions rapidly (like "bouncing")
+  3. Use different speeds for each direction
+  4. Create a "dance" with rhythmic movements
+
+  Important: Always add a small delay() between movements so the robot
+  has time to change direction smoothly.
+
+  Example:
+    car.moveForward(150, 1000);   // Go forward 1 second
+    delay(500);                    // Brief pause (half second)
+    car.moveBackward(150, 1000);  // Go backward 1 second
+
+  Why the pause? Just like a car slowing down before shifting to
+  reverse, the robot needs a moment to switch directions.
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 02: Backward Movement");
+    car.setup();
+  }
+
+  void loop() {
+    // Example 1: Simple backward movement
+    Serial.println("Moving backward slowly");
+    car.moveBackward(120, 1000);  // Slow reverse for 1 second
+    delay(2000);
+
+    // Example 2: Forward then backward (bouncing)
+    Serial.println("Forward and backward");
+    car.moveForward(150, 1000);   // Forward 1 second
+    delay(500);                    // Brief pause
+    car.moveBackward(150, 1000);  // Backward 1 second
+    delay(2000);
+
+    // Example 3: The "Dance" - forward, backward, forward
+    Serial.println("The Dance!");
+    car.moveForward(200, 800);    // Quick forward
+    delay(200);
+    car.moveBackward(200, 800);   // Quick backward
+    delay(200);
+    car.moveForward(200, 800);    // Quick forward again
+    delay(2000);
+
+    // Example 4: Different speeds backward
+    Serial.println("Slow to fast backward");
+    car.moveBackward(80, 1000);   // Very slow
+    delay(500);
+    car.moveBackward(160, 1000);  // Medium
+    delay(500);
+    car.moveBackward(255, 1000);  // Maximum speed
+    delay(500);
+
+    car.stopMotors();
+    delay(5000);
+  }
+
+
+LINE-BY-LINE EXPLANATION FOR EACH EXAMPLE
+==========================================
+
+  Example 1: Simple Backward Movement
+    car.moveBackward(120, 1000);
+    - Speed 120 is relatively slow (about half power)
+    - 1000 milliseconds = 1 second
+    - The robot moves backward in a straight line for 1 second
+
+  Example 2: Forward Then Backward
+    car.moveForward(150, 1000);
+    - First, go forward for 1 second at speed 150
+    delay(500);
+    - Wait half a second (the robot stops during this time)
+    car.moveBackward(150, 1000);
+    - Then go backward for 1 second at the same speed
+    - Since the speed and time are the same, the robot should
+      end up close to where it started!
+
+  Example 3: The "Dance"
+    - Three quick movements: forward, backward, forward
+    - Each lasts 800 milliseconds (0.8 seconds)
+    - Only 200ms pause between them (very quick transitions)
+    - Speed 200 is fast, making it look energetic!
+
+  Example 4: Different Speeds
+    - Shows the difference between slow, medium, and fast
+    - Same duration (1 second each) but different speeds
+    - Watch how the robot moves differently at each speed
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: The Robot Dance
+
+  Create a "dance" routine using forward and backward movements!
+
+  Your dance MUST include:
+    1. At least 6 movements (mix of forward and backward)
+    2. At least 3 different speed values
+    3. At least 3 different durations (some quick, some slow)
+    4. Use delay() to create rhythm in your dance
+    5. Use Serial.println() to announce each dance move
+
+  Starter Template:
+    void loop() {
+      Serial.println("The Shuffle");
+      car.moveForward(100, 300);
+      delay(200);
+      car.moveBackward(100, 300);
+      delay(200);
+
+      Serial.println("The Moonwalk");
+      car.moveBackward(200, 1500);
+      delay(500);
+
+      // Add more moves here!
+
+      delay(5000);  // Wait before repeating
+    }
+
+  Bonus Challenges:
+    1. Make a dance that lasts EXACTLY 10 seconds
+    2. Give each dance move a creative name
+    3. Create a pattern that repeats (like a chorus in a song)
+
+
+SPEED REFERENCE CHART
+=====================
+  Speed Value   Description         How It Feels
+  ------------- ------------------- -------------------------
+  0             Stopped             Not moving at all
+  50            Very slow           Barely moving
+  100           Slow                Gentle, easy to control
+  150           Medium              Good all-around speed
+  200           Fast                Quick and responsive
+  255           Maximum             Full power, hardest to control
+
+  Tip: When you're learning, stick to speeds between 100-180.
+  Very slow speeds (below 80) might not move the robot at all
+  because there isn't enough power to overcome friction.
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Forgetting the delay between forward and backward
+     (the robot might jerk or skip movements)
+  2. Using "Backward" instead of "moveBackward" (use exact spelling)
+  3. Making the dance too fast (add delays so you can see each move)
+  4. Not adding Serial.println() messages (you won't know which
+     move is happening)
+
+
+TEACHER NOTES
+=============
+  - Have students plan their dance on paper before coding
+  - Use a timer to challenge students to create exact-length routines
+  - Discuss: "If forward and backward use the same speed and time,
+    where does the robot end up?" (Answer: back where it started)
+  - This lesson introduces the concept of SEQUENCING - doing things
+    in a specific order
+
+=============================================================================
+  END OF LESSON 02
+=============================================================================

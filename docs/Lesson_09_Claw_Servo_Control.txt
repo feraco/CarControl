@@ -1,0 +1,264 @@
+=============================================================================
+  LESSON 09: THE ROBOT CLAW - SERVO CONTROL
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Your robot can see obstacles - now let's give it the ability to GRAB
+things! In this lesson, you'll learn to control the robot's claw using
+a servo motor. You'll open and close the claw, pick up small objects,
+and even combine claw control with movement and sensors to create a
+fetch-and-carry robot!
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-08
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Attach and control the claw servo
+  2. Open and close the claw on command
+  3. Create a pick-up-and-place sequence
+  4. Combine claw operation with robot movement
+  5. Use the ultrasonic sensor to approach objects automatically
+
+
+VOCABULARY
+==========
+  Gripper     - A mechanical device for grabbing things. The claw is
+                a type of gripper.
+
+  End effector - The tool at the end of a robot arm. In our case,
+                 the claw is the end effector.
+
+  Actuator    - Something that makes a robot move or do work.
+                Motors are actuators. The claw servo is an actuator.
+
+  Sequence    - A series of steps performed in a specific order.
+                A pickup sequence: approach, open, grab, lift, move.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  attachClaw(pin)
+  ---------------
+  What it does:  Connects the claw servo motor to the Arduino.
+  How to use it: car.attachClaw(11);
+  When to call:  In setup(), before using any claw commands.
+  The pin:       Usually pin 11 on our robot.
+
+  -------------------------------------------------------------------------
+
+  openClaw()
+  ----------
+  What it does:  Opens the claw wide, ready to grab something.
+  How to use it: car.openClaw();
+  Servo angle:   Moves to 0 degrees (fully open).
+  Wait time:     Add delay(1000) after calling to let it finish opening.
+
+  Real-world comparison:
+    Opening your hand wide, fingers spread apart, ready to pick
+    something up.
+
+  -------------------------------------------------------------------------
+
+  closeClaw()
+  -----------
+  What it does:  Closes the claw to grip an object.
+  How to use it: car.closeClaw();
+  Servo angle:   Moves to 180 degrees (fully closed).
+  Wait time:     Add delay(1500) after calling for a secure grip.
+
+  Real-world comparison:
+    Closing your hand into a fist around an object. The tighter
+    you squeeze, the more securely you hold it.
+
+
+THE PICKUP SEQUENCE
+====================
+To pick up an object, follow these steps in order:
+
+  Step 1: PREPARE
+    car.openClaw();        // Open the claw wide
+    delay(1000);           // Wait for it to open
+
+  Step 2: APPROACH
+    car.moveForward(100, 800);  // Slowly move toward the object
+    delay(500);
+
+  Step 3: GRAB
+    car.closeClaw();       // Close the claw around the object
+    delay(1500);           // Wait for secure grip
+
+  Step 4: TRANSPORT
+    car.moveBackward(120, 500);  // Back up a little
+    car.turnRight(150, 500);      // Turn to new location
+    car.moveForward(120, 1500);   // Drive to destination
+
+  Step 5: RELEASE
+    car.openClaw();        // Open the claw to drop the object
+    delay(1000);           // Wait for full release
+
+  Step 6: RETREAT
+    car.moveBackward(120, 500);  // Back away from the object
+
+  This is the same basic sequence used by industrial robots in
+  factories! They pick items from one conveyor belt and place
+  them on another.
+
+
+SMART PICKUP: USING THE SENSOR
+===============================
+Instead of guessing where the object is, use the ultrasonic sensor
+to approach it automatically:
+
+  car.openClaw();                               // Prepare
+  int distance = car.getDistanceToObstacle();   // Check distance
+
+  while(distance > 10) {                        // Move until close
+    car.moveForward(100, 100);                  // Small step forward
+    distance = car.getDistanceToObstacle();     // Check again
+  }
+
+  car.stopMotors();    // We're close enough!
+  car.closeClaw();     // Grab it!
+  delay(1500);         // Wait for grip
+
+  This is much more reliable than guessing timing!
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 09: Robot Claw Control");
+    car.setup();
+    car.attachClaw(11);  // Connect claw servo to pin 11
+    Serial.println("Place a small object in front of the robot.");
+  }
+
+  void loop() {
+    // Example 1: Basic open and close
+    Serial.println("Opening claw...");
+    car.openClaw();
+    delay(2000);
+
+    Serial.println("Closing claw...");
+    car.closeClaw();
+    delay(2000);
+
+    // Example 2: Object pickup sequence
+    Serial.println("Pickup sequence starting...");
+
+    Serial.println("Step 1: Open claw");
+    car.openClaw();
+    delay(1000);
+
+    Serial.println("Step 2: Approach object");
+    car.moveForward(120, 800);
+    delay(500);
+
+    Serial.println("Step 3: Grab!");
+    car.closeClaw();
+    delay(1500);
+
+    Serial.println("Step 4: Back up with object");
+    car.moveBackward(120, 1000);
+    delay(500);
+
+    Serial.println("Step 5: Release");
+    car.openClaw();
+    delay(2000);
+
+    // Example 3: Smart pickup with sensor
+    Serial.println("Smart pickup - approaching until detected...");
+    car.attachSensorServo(10);
+    car.centerServo();
+    car.openClaw();
+    delay(1000);
+
+    int distance = car.getDistanceToObstacle();
+    while(distance > 10) {
+      car.moveForward(100, 100);
+      distance = car.getDistanceToObstacle();
+      Serial.print("Distance: ");
+      Serial.println(distance);
+      delay(100);
+    }
+
+    Serial.println("Object detected! Grabbing...");
+    car.stopMotors();
+    car.closeClaw();
+    delay(1500);
+
+    car.moveBackward(120, 1000);
+    car.openClaw();
+    delay(1000);
+
+    Serial.println("Sequence complete!");
+    delay(5000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: The Object Mover
+
+  Create a program that:
+    1. Opens the claw
+    2. Uses the ultrasonic sensor to find an object
+    3. Approaches the object slowly
+    4. Grabs it when within 10 cm
+    5. Turns 90 degrees to the right
+    6. Drives forward to a "drop zone"
+    7. Releases the object
+    8. Backs away
+    9. Turns around and returns to the starting position
+
+  Requirements:
+    - Print a status message for every step
+    - Use the sensor (not just timing) to find the object
+    - Handle the object gently (slow speeds near the object)
+    - Have the robot return to approximately the start position
+
+  Bonus Challenges:
+    1. Pick up the object, move it, then go back and
+       pick it up again to move it further
+    2. Add a "celebration" after successful delivery
+       (spin in a circle!)
+    3. Make the claw open and close 3 times quickly
+       as a "ready" signal before starting
+
+
+SAFETY TIPS
+============
+  - Use small, lightweight objects for the claw
+  - Don't force the claw closed on objects that are too big
+  - Keep fingers away from the claw when it's closing!
+  - The claw servo has limited strength - it won't hold heavy items
+
+
+TEACHER NOTES
+=============
+  - Provide small objects (ping pong ball, small toy, eraser)
+  - Have students practice the pickup sequence manually first
+  - Discuss: How are real robot arms similar? (assembly lines,
+    warehouse robots, surgical robots)
+  - This lesson combines sensors + movement + claw = full system
+  - Great for teamwork: one student drives, one operates claw
+
+=============================================================================
+  END OF LESSON 09
+=============================================================================

@@ -1,0 +1,328 @@
+=============================================================================
+  LESSON 07: SEEING WITH SOUND - ULTRASONIC SENSOR BASICS
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Your robot can move, but it's driving "blind" - it has no idea what's
+around it! In this lesson, you'll give your robot the ability to "see"
+by using an ultrasonic sensor. This sensor works like a bat, using
+sound waves to measure the distance to objects. Your robot will finally
+be able to detect walls and obstacles!
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-06
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Understand how ultrasonic sensors measure distance
+  2. Read distance values from the sensor
+  3. Use if-else statements to make decisions based on distance
+  4. Stop the robot before it hits a wall
+  5. Display sensor data using the Serial Monitor
+
+
+VOCABULARY
+==========
+  Ultrasonic  - Sound waves that are too high-pitched for humans to
+                hear. "Ultra" means beyond, "sonic" means sound.
+
+  Echolocation - Using echoes to find objects. Bats and dolphins do
+                 this naturally. Your robot does it electronically!
+
+  Sensor      - A device that detects something in the environment.
+                Your robot's ultrasonic sensor detects distance.
+
+  Variable    - A named container that holds a value. Like a labeled
+                box that stores a number. We'll store distance in
+                a variable called "distance."
+
+  If-else     - A way to make decisions in code. "IF this is true,
+                do this. ELSE (otherwise), do that."
+
+  Threshold   - A boundary value that triggers a different action.
+                "If distance is less than 20 cm, stop." The 20 cm
+                is the threshold.
+
+
+HOW THE ULTRASONIC SENSOR WORKS
+================================
+  Step 1: The sensor sends out a tiny "ping" of ultrasonic sound
+          (too high-pitched for you to hear)
+
+  Step 2: The sound wave travels through the air at about 343 meters
+          per second (the speed of sound)
+
+  Step 3: The sound hits an object and bounces back (like an echo)
+
+  Step 4: The sensor measures how long the echo took to return
+
+  Step 5: Using math, it calculates the distance:
+          distance = (time × speed of sound) ÷ 2
+          (Divide by 2 because the sound went there AND back)
+
+  The library does all this math for you! You just call the command
+  and get a number back.
+
+  Real-world examples:
+    - Bats navigate in the dark using echolocation
+    - Dolphins find fish underwater the same way
+    - Your car might have backup sensors that beep when you're close
+    - Automatic doors detect when someone is approaching
+
+  Distance ranges:
+    0-5 cm:   DANGER! Almost touching the object
+    5-20 cm:  Close. Be careful.
+    20-50 cm: Medium distance. Room to maneuver.
+    50+ cm:   Far away or nothing detected.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  getDistanceToObstacle()
+  -----------------------
+  What it does:  Measures the distance to the nearest object in front
+                 of the sensor.
+
+  How to use it: int distance = car.getDistanceToObstacle();
+
+  Returns:       A number representing centimeters. For example, if
+                 there's a wall 30 cm away, it returns 30.
+
+  Example:       int distance = car.getDistanceToObstacle();
+                 Serial.print("Distance: ");
+                 Serial.print(distance);
+                 Serial.println(" cm");
+
+  Important notes:
+    - You need to STORE the result in a variable (int distance)
+    - The variable type is "int" (short for integer - a whole number)
+    - You can then use that variable in if-else decisions
+    - Call it each time you want a new reading (it doesn't update
+      automatically)
+
+  -------------------------------------------------------------------------
+
+  checkObstacleInFront()
+  ----------------------
+  What it does:  Checks if there's an object very close (within ~10 cm).
+
+  How to use it: car.checkObstacleInFront();
+
+  Note: This is a simpler check - just "is something right there?"
+
+
+NEW CONCEPT: VARIABLES
+=======================
+A variable is like a labeled box that holds a number.
+
+  Creating a variable:
+    int distance = 0;
+
+  Breaking it down:
+    int       - The TYPE of data (integer = whole number)
+    distance  - The NAME you chose (you pick the name!)
+    = 0       - The starting VALUE (we'll replace it with sensor data)
+
+  Storing sensor data:
+    distance = car.getDistanceToObstacle();
+
+  This reads the sensor and puts the distance number into the variable.
+  Now you can use "distance" anywhere in your code!
+
+  Using the variable:
+    Serial.println(distance);  // Print it
+    if(distance < 20) { }     // Make decisions with it
+
+
+NEW CONCEPT: IF-ELSE STATEMENTS
+================================
+If-else lets your robot make decisions:
+
+  Basic structure:
+    if(condition) {
+      // Do this if condition is TRUE
+    } else {
+      // Do this if condition is FALSE
+    }
+
+  Example:
+    if(distance < 20) {
+      Serial.println("Too close!");
+      car.stopMotors();
+    } else {
+      Serial.println("Safe to move");
+      car.moveForward(150, 500);
+    }
+
+  You can also chain multiple conditions:
+    if(distance < 10) {
+      Serial.println("VERY CLOSE!");
+    } else if(distance < 30) {
+      Serial.println("Close");
+    } else if(distance < 60) {
+      Serial.println("Medium distance");
+    } else {
+      Serial.println("Far away");
+    }
+
+  Comparison operators:
+    <   Less than          (distance < 20 means "closer than 20cm")
+    >   Greater than       (distance > 50 means "farther than 50cm")
+    ==  Equal to           (distance == 25 means "exactly 25cm")
+    <=  Less than or equal
+    >=  Greater than or equal
+    !=  Not equal to
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 07: Ultrasonic Sensor");
+    car.setup();
+    car.attachSensorServo(10);  // Connect the sensor servo
+    car.centerServo();           // Point sensor straight ahead
+    Serial.println("Hold objects in front of the sensor!");
+  }
+
+  void loop() {
+    // Read the distance
+    int distance = car.getDistanceToObstacle();
+
+    // Print it
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print(" cm - ");
+
+    // Make a decision based on distance
+    if(distance < 10) {
+      Serial.println("VERY CLOSE!");
+    } else if(distance < 30) {
+      Serial.println("Close");
+    } else if(distance < 60) {
+      Serial.println("Medium distance");
+    } else {
+      Serial.println("Far away");
+    }
+
+    delay(500);
+
+    // Stop before hitting a wall
+    Serial.println("Moving forward until obstacle...");
+    distance = car.getDistanceToObstacle();
+    while(distance > 15) {
+      car.moveForward(120, 100);
+      distance = car.getDistanceToObstacle();
+      Serial.print("Distance: ");
+      Serial.println(distance);
+      delay(100);
+    }
+    Serial.println("STOP! Object detected!");
+    car.stopMotors();
+    delay(3000);
+  }
+
+
+NEW CONCEPT: THE WHILE LOOP
+=============================
+  while(condition) {
+    // Keep doing this as long as condition is true
+  }
+
+  Example in our code:
+    while(distance > 15) {
+      car.moveForward(120, 100);  // Move forward a little
+      distance = car.getDistanceToObstacle();  // Check again
+    }
+
+  This keeps the robot moving forward, checking the distance each
+  time, until something is within 15 cm. Then it stops.
+
+  Think of it like walking toward a wall with your eyes closed:
+  "While I can still stretch my arm out without touching anything,
+   take one more step forward."
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Smart Wall Stopper
+
+  Create a program that:
+    1. Moves the robot forward at medium speed
+    2. Constantly checks the distance ahead
+    3. When an object is detected at 20 cm or less, STOP
+    4. Print "Object detected at __ cm - STOPPING!"
+    5. Wait 2 seconds
+    6. Back up until the object is 40 cm away
+    7. Print "Safe distance reached"
+    8. Stop and wait 5 seconds
+    9. Repeat
+
+  Hints:
+    - Use a while loop for continuous movement
+    - Remember to check the sensor INSIDE the loop
+    - Use a second while loop for backing up
+
+  Starter Template:
+    void loop() {
+      // Move forward until obstacle
+      int distance = car.getDistanceToObstacle();
+      while(distance > 20) {
+        car.moveForward(150, 100);
+        distance = car.getDistanceToObstacle();
+      }
+
+      // Detected! Stop and report
+      car.stopMotors();
+      Serial.print("Object at ");
+      Serial.print(distance);
+      Serial.println(" cm - STOPPING!");
+      delay(2000);
+
+      // Back up until safe
+      // YOUR CODE HERE: while loop to back up
+      // Hint: while(distance < 40) { ... }
+
+      Serial.println("Safe distance!");
+      delay(5000);
+    }
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Forgetting to call car.attachSensorServo(10) in setup
+  2. Forgetting to call car.centerServo() before measuring
+  3. Not storing the result in a variable (just calling the function
+     without saving the value)
+  4. Not updating the distance variable inside the while loop
+     (this creates an infinite loop - the robot never stops!)
+  5. Using = instead of == for comparison (= assigns a value,
+     == compares values)
+
+
+TEACHER NOTES
+=============
+  - Have students hold objects at different distances and record readings
+  - Create a class data table: actual distance vs. sensor reading
+  - Discuss accuracy and limitations (max range, angle of detection)
+  - Great time to introduce the Serial Monitor if not done yet
+  - Discuss real-world applications (parking sensors, autonomous cars)
+  - Safety: Always be ready to pick up the robot if it goes off course
+
+=============================================================================
+  END OF LESSON 07
+=============================================================================

@@ -1,0 +1,378 @@
+=============================================================================
+  LESSON 15: AUTONOMOUS ROBOT DESIGN - PART 1
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Congratulations - you've learned every command and sensor on the robot!
+Now it's time to combine EVERYTHING into autonomous behaviors. In this
+lesson, you'll create a robot that can switch between different "modes"
+based on what it senses. This is how real autonomous robots work -
+from Mars rovers to self-driving cars to warehouse robots.
+
+Time Required: 90-120 minutes
+Difficulty: Advanced
+Prerequisites: Lessons 01-14
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Combine all sensors and actuators in one program
+  2. Create different robot "behaviors" (modes)
+  3. Switch between behaviors based on sensor input
+  4. Design and implement a robot mission
+  5. Understand state machines
+
+
+VOCABULARY
+==========
+  Behavior    - A specific way the robot acts. "Explore," "follow line,"
+                and "grab object" are all behaviors.
+
+  State       - The current mode or situation the robot is in.
+                "I am currently EXPLORING" is a state.
+
+  State       - A system that switches between different states based
+  machine       on conditions. Like a traffic light: Green → Yellow →
+                Red → Green (each light is a "state").
+
+  Transition  - Moving from one state to another. "When I find a line,
+                switch from EXPLORING to LINE_FOLLOWING."
+
+  Sensor      - Using data from multiple sensors together to make
+  fusion        better decisions. Instead of just distance OR line
+                sensors, use BOTH at the same time.
+
+  Enum        - A special type in code that lets you create a list
+                of named states. Much clearer than using numbers.
+
+
+THE STATE MACHINE CONCEPT
+===========================
+A state machine is like a flowchart for robot behavior:
+
+  ┌──────────────┐
+  │  EXPLORING    │ ← Robot starts here
+  └──────┬───────┘
+         │ Found a line?
+         ▼
+  ┌──────────────┐
+  │ LINE FOLLOWING│
+  └──────┬───────┘
+         │ Lost the line?
+         ▼
+  ┌──────────────┐
+  │  EXPLORING    │ ← Back to exploring!
+  └──────────────┘
+
+  Another example:
+
+  EXPLORING ──(found object)──→ APPROACHING
+  APPROACHING ──(reached it)──→ GRABBING
+  GRABBING ──(got it)──────→ DELIVERING
+  DELIVERING ──(dropped it)──→ EXPLORING
+
+  Each state has:
+    1. What the robot DOES in this state (the behavior)
+    2. What makes it LEAVE this state (the transition condition)
+    3. Which state it goes to NEXT
+
+
+CREATING STATES IN CODE
+========================
+We use an "enum" (enumeration) to create named states:
+
+  enum RobotState {
+    EXPLORING,
+    LINE_FOLLOWING,
+    OBJECT_FOUND,
+    RETURNING_HOME
+  };
+
+  RobotState currentState = EXPLORING;  // Start in EXPLORING mode
+
+This is MUCH better than using numbers:
+  BAD:  int state = 0;    // What does 0 mean? Who knows!
+  GOOD: RobotState currentState = EXPLORING;  // Clear and obvious!
+
+
+CREATING BEHAVIORS
+===================
+Each behavior is a function:
+
+  void exploreBehavior() {
+    // Check for obstacles and navigate
+    int centerDist = car.getCenterDistance();
+
+    if(centerDist < 30) {
+      // Obstacle - scan and choose direction
+      int leftDist = car.getLeftDistance();
+      int rightDist = car.getRightDistance();
+      car.centerServo();
+
+      if(leftDist > rightDist) {
+        car.turnLeft(160, 500);
+      } else {
+        car.turnRight(160, 500);
+      }
+    } else {
+      car.moveForward(160, 400);
+    }
+  }
+
+  void lineFollowBehavior() {
+    int leftValue = car.getLineSensorLeft();
+    int middleValue = car.getLineSensorMiddle();
+    int rightValue = car.getLineSensorRight();
+
+    if(middleValue < 500) {
+      car.moveForward(140, 100);
+    } else if(leftValue < 500) {
+      car.turnLeft(120, 50);
+    } else if(rightValue < 500) {
+      car.turnRight(120, 50);
+    } else {
+      // Lost line - switch back to exploring
+      currentState = EXPLORING;
+    }
+  }
+
+
+THE MAIN LOOP WITH STATE MACHINE
+==================================
+  void loop() {
+    // Check for state transitions
+    int middleValue = car.getLineSensorMiddle();
+
+    if(middleValue < 500 && currentState == EXPLORING) {
+      Serial.println("LINE DETECTED! Switching to LINE FOLLOW");
+      currentState = LINE_FOLLOWING;
+    }
+
+    // Execute current behavior
+    switch(currentState) {
+      case EXPLORING:
+        exploreBehavior();
+        break;
+      case LINE_FOLLOWING:
+        lineFollowBehavior();
+        break;
+      case OBJECT_FOUND:
+        objectFoundBehavior();
+        break;
+      case RETURNING_HOME:
+        returnHomeBehavior();
+        break;
+    }
+
+    delay(50);
+  }
+
+  The "switch" statement is like a series of if-else statements:
+    switch(currentState) = "Which state am I in?"
+    case EXPLORING = "If I'm exploring, do this behavior"
+    break = "Done with this case, exit the switch"
+
+
+ALL ROBOT CAPABILITIES (REVIEW)
+=================================
+  MOVEMENT:
+    car.moveForward(speed, duration)
+    car.moveBackward(speed, duration)
+    car.turnLeft(speed, duration)
+    car.turnRight(speed, duration)
+    car.turnAround()
+    car.stopMotors()
+
+  ULTRASONIC SENSOR:
+    car.getDistanceToObstacle()
+    car.getCenterDistance()
+    car.getLeftDistance()
+    car.getRightDistance()
+
+  SENSOR SERVO:
+    car.attachSensorServo(10)
+    car.lookLeft()
+    car.lookRight()
+    car.centerServo()
+
+  CLAW:
+    car.attachClaw(11)
+    car.openClaw()
+    car.closeClaw()
+
+  LINE SENSORS:
+    car.initLineSensors()
+    car.getLineSensorLeft()
+    car.getLineSensorMiddle()
+    car.getLineSensorRight()
+    car.followLine(threshold)
+
+  PROGRAM CONTROL:
+    delay(ms)
+    millis()
+    Serial.println()
+    for loops, while loops
+    if-else statements
+    functions
+    variables and constants
+
+
+COMPLETE CODE: THREE-MISSION PROGRAM
+======================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int SAFE_DISTANCE = 30;
+  const int LINE_THRESHOLD = 500;
+  const int MOVE_SPEED = 160;
+
+  enum RobotState { EXPLORING, LINE_FOLLOWING, OBJECT_FOUND, RETURNING_HOME };
+  RobotState currentState = EXPLORING;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 15: Autonomous Design");
+    car.setup();
+    car.initLineSensors();
+    car.attachSensorServo(10);
+    car.attachClaw(11);
+    car.centerServo();
+    car.openClaw();
+    delay(3000);
+  }
+
+  void exploreBehavior() {
+    Serial.println("[EXPLORING]");
+    int centerDist = car.getCenterDistance();
+    if(centerDist < SAFE_DISTANCE) {
+      int leftDist = car.getLeftDistance();
+      int rightDist = car.getRightDistance();
+      car.centerServo();
+      if(leftDist > rightDist) car.turnLeft(MOVE_SPEED, 500);
+      else car.turnRight(MOVE_SPEED, 500);
+    } else {
+      car.moveForward(MOVE_SPEED, 400);
+    }
+  }
+
+  void lineFollowBehavior() {
+    Serial.println("[LINE FOLLOWING]");
+    int L = car.getLineSensorLeft();
+    int M = car.getLineSensorMiddle();
+    int R = car.getLineSensorRight();
+
+    if(M < LINE_THRESHOLD) car.moveForward(140, 100);
+    else if(L < LINE_THRESHOLD) car.turnLeft(120, 50);
+    else if(R < LINE_THRESHOLD) car.turnRight(120, 50);
+    else {
+      Serial.println("  Lost line -> EXPLORING");
+      currentState = EXPLORING;
+    }
+  }
+
+  void loop() {
+    // Mission 1: 20-second exploration
+    Serial.println("=== Mission 1: Exploration ===");
+    currentState = EXPLORING;
+    unsigned long startTime = millis();
+    while(millis() - startTime < 20000) {
+      exploreBehavior();
+      delay(100);
+    }
+    car.stopMotors();
+    delay(3000);
+
+    // Mission 2: Hybrid (explore until line, then follow)
+    Serial.println("=== Mission 2: Hybrid Navigation ===");
+    currentState = EXPLORING;
+    startTime = millis();
+    while(millis() - startTime < 30000) {
+      int middleValue = car.getLineSensorMiddle();
+      if(middleValue < LINE_THRESHOLD && currentState == EXPLORING) {
+        Serial.println("*** LINE DETECTED! ***");
+        currentState = LINE_FOLLOWING;
+      }
+      if(currentState == EXPLORING) exploreBehavior();
+      else lineFollowBehavior();
+      delay(50);
+    }
+    car.stopMotors();
+    delay(3000);
+
+    // Mission 3: Room patrol with direction changes
+    Serial.println("=== Mission 3: Room Patrol ===");
+    startTime = millis();
+    unsigned long lastTurn = millis();
+    while(millis() - startTime < 25000) {
+      int centerDist = car.getCenterDistance();
+      if(centerDist < SAFE_DISTANCE) {
+        int leftDist = car.getLeftDistance();
+        int rightDist = car.getRightDistance();
+        car.centerServo();
+        if(leftDist > rightDist) car.turnLeft(MOVE_SPEED, 500);
+        else car.turnRight(MOVE_SPEED, 500);
+        lastTurn = millis();
+      } else if(millis() - lastTurn > 5000) {
+        car.turnRight(MOVE_SPEED, 300);
+        lastTurn = millis();
+      } else {
+        car.moveForward(MOVE_SPEED, 300);
+      }
+      delay(100);
+    }
+    car.stopMotors();
+    delay(10000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Design Your Own Autonomous Mission
+
+  Choose one mission and implement it:
+
+  MISSION A: Explorer
+    - Robot explores an area for 45 seconds
+    - Avoids all obstacles
+    - Makes periodic direction changes to cover more area
+    - Reports obstacles encountered at the end
+
+  MISSION B: Line Follower + Explorer
+    - Robot explores until it finds a line
+    - Follows the line until it ends
+    - Goes back to exploring
+    - Runs for 60 seconds
+
+  MISSION C: Fetch Robot
+    - Robot explores until it detects a close object
+    - Approaches the object
+    - Grabs it with the claw
+    - Turns around and returns
+    - Releases the object
+
+  Requirements for ALL missions:
+    - Use at least 2 different behaviors (states)
+    - Print clear status messages for each state
+    - Handle errors gracefully (don't crash or freeze)
+    - Run for a defined time period
+
+
+TEACHER NOTES
+=============
+  - Let students CHOOSE their mission (ownership increases engagement)
+  - This is a great 2-class lesson (plan in class 1, code in class 2)
+  - Have students present their designs before coding
+  - Encourage peer review: "What happens if the line ends?"
+  - This lesson bridges to the final capstone project (Lesson 16)
+
+=============================================================================
+  END OF LESSON 15
+=============================================================================

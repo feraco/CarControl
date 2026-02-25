@@ -1,0 +1,253 @@
+=============================================================================
+  LESSON 06: ROTATION CHALLENGE - NAVIGATION MISSION
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+This is your biggest challenge yet! You'll use EVERYTHING you've learned -
+forward, backward, left turns, right turns, and turnAround - to complete
+a navigation mission. Think of your robot as a delivery truck that needs
+to visit multiple stops and return to base. This is real-world robotics!
+
+Time Required: 75-90 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-05
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Plan multi-step navigation routes
+  2. Combine all movement commands in one program
+  3. Navigate to multiple waypoints
+  4. Return to the starting position after completing a route
+  5. Debug and troubleshoot navigation problems
+
+
+VOCABULARY
+==========
+  Waypoint    - A specific location the robot needs to visit.
+                Like stops on a bus route.
+
+  Route       - The complete path from start to finish, including
+                all turns and straight sections.
+
+  Algorithm   - A step-by-step set of instructions to solve a
+                problem. Your navigation plan is an algorithm!
+
+  Debug       - Finding and fixing mistakes in your code.
+                When the robot doesn't go where you expected,
+                you need to debug.
+
+  Spatial     - Having to do with space and positions. "Spatial
+  reasoning     reasoning" means thinking about where things are
+                and how to get from one place to another.
+
+
+ALL COMMANDS REVIEW
+===================
+  Here is everything you know so far:
+
+  MOVEMENT:
+    car.moveForward(speed, duration)    Drive forward
+    car.moveBackward(speed, duration)   Drive backward
+    car.turnLeft(speed, duration)       Spin left
+    car.turnRight(speed, duration)      Spin right
+    car.turnAround()                    180-degree turn
+    car.stopMotors()                    Stop everything
+
+  PROGRAM CONTROL:
+    delay(milliseconds)                 Pause the program
+    Serial.println("message")          Print text to screen
+    for(int i=0; i<n; i++) { }         Repeat code n times
+
+
+PLANNING YOUR NAVIGATION
+=========================
+Before writing ANY code, plan on paper!
+
+  Step 1: Draw a map of your route
+    Use graph paper or a blank sheet. Mark:
+    - Starting position (with an arrow showing which way robot faces)
+    - Each waypoint (labeled A, B, C, etc.)
+    - The path between waypoints
+
+  Step 2: List each movement
+    Write down every move in order:
+    "Forward 2 sec, right turn 90°, forward 1 sec, left turn 90°..."
+
+  Step 3: Think about the return trip
+    How will the robot get back? You can:
+    - Reverse every move (go backward, turn opposite direction)
+    - Take a different route back
+
+  Example route on paper:
+
+    Start
+      |  (forward 1.5 sec)
+      v
+     [A] --- (right turn, then forward 1 sec) ---> [B]
+                                                     |
+                                      (left turn,    |
+                                       forward 1.5s) v
+                                                    [C]
+
+  Code for this route:
+    car.moveForward(180, 1500);   // Start to A
+    car.turnRight(150, 500);      // Turn right at A
+    car.moveForward(180, 1000);   // A to B
+    car.turnLeft(150, 500);       // Turn left at B (not a left turn!)
+    car.moveForward(180, 1500);   // B to C
+
+
+COMPLETE CODE: THE DELIVERY ROUTE
+===================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 06: Rotation Challenge");
+    car.setup();
+  }
+
+  void loop() {
+    Serial.println("MISSION: Delivery Route");
+    Serial.println("========================");
+
+    // Start at warehouse
+    Serial.println("Starting at warehouse...");
+    delay(1000);
+
+    // Route to Delivery Point 1
+    Serial.println("Heading to Delivery Point 1:");
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1500);
+    delay(500);
+    Serial.println("  - Turning right 90 degrees");
+    car.turnRight(150, 500);
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1000);
+    Serial.println("*** Arrived at Delivery Point 1 ***");
+    delay(2000);  // Simulate delivery
+
+    // Route to Delivery Point 2
+    Serial.println("Heading to Delivery Point 2:");
+    Serial.println("  - Turning left 90 degrees");
+    car.turnLeft(150, 500);
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1500);
+    delay(500);
+    Serial.println("  - Turning left 90 degrees");
+    car.turnLeft(150, 500);
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1000);
+    Serial.println("*** Arrived at Delivery Point 2 ***");
+    delay(2000);
+
+    // Return to warehouse
+    Serial.println("Returning to warehouse:");
+    Serial.println("  - Turning around");
+    car.turnAround();
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1000);
+    delay(500);
+    Serial.println("  - Turning right 90 degrees");
+    car.turnRight(150, 500);
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1500);
+    delay(500);
+    Serial.println("  - Turning right 90 degrees");
+    car.turnRight(150, 500);
+    delay(500);
+    Serial.println("  - Moving forward");
+    car.moveForward(180, 1000);
+
+    Serial.println("*** Back at warehouse! Mission Complete! ***");
+    car.stopMotors();
+    delay(10000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  MAIN CHALLENGE: Waypoint Navigation Course
+
+  Set up 4 waypoints on the floor (use tape, cups, or markers)
+  arranged like this:
+
+      Start
+        |
+        v
+       [A]--->[B]
+               |
+               v
+       [D]<---[C]
+        |
+        v
+      Finish
+
+  Your robot must:
+    1. Move from Start to waypoint A
+    2. Turn right and move to waypoint B
+    3. Turn right and move to waypoint C
+    4. Turn right and move to waypoint D
+    5. Turn right and move to Finish
+
+  Requirements:
+    - Print which waypoint you're heading to
+    - Pause 2 seconds at each waypoint
+    - Use consistent speed throughout
+    - Make accurate 90-degree turns
+    - Robot should face the same direction at finish as it started
+
+  Bonus Challenges:
+    1. Run the route in REVERSE (D -> C -> B -> A)
+    2. Create a "Figure 8" pattern using two squares
+    3. Navigate the course using ONLY left turns
+    4. Time your route and try to optimize for speed
+
+
+HOW TO DEBUG YOUR NAVIGATION
+==============================
+When the robot doesn't go where you expected:
+
+  1. Watch carefully and note WHERE it goes wrong
+  2. Is the turn too much or too little? Adjust duration.
+  3. Is it going too far or not far enough? Adjust forward time.
+  4. Add Serial.println() messages before EVERY movement
+  5. Use delay(3000) after each move so you can observe
+  6. Fix ONE thing at a time, then test again
+
+  Common problems:
+    Robot veers to one side -> Battery might be low, or one motor
+                               is slightly faster than the other
+    Turn is wrong angle    -> Adjust turn duration
+    Robot overshoots       -> Reduce forward duration or speed
+
+
+TEACHER NOTES
+=============
+  - Set up the waypoint course before class
+  - Measure and mark distances between waypoints
+  - Have students plan routes ON PAPER first (hand in for credit)
+  - This lesson tests all movement skills from lessons 1-5
+  - Allow time for debugging - it's an essential skill
+  - Discuss: How is this like GPS navigation?
+  - Cross-curricular: Connect to coordinate geometry
+  - Assessment idea: Grade on both planning (paper) and execution
+
+=============================================================================
+  END OF LESSON 06
+=============================================================================

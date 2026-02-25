@@ -1,0 +1,331 @@
+=============================================================================
+  LESSON 12: ADVANCED OBSTACLE COURSE
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+The simple obstacle course worked, but what happens when the robot gets
+stuck in a corner? Or keeps turning back and forth? In this lesson,
+you'll make your robot SMARTER by adding stuck detection, escape
+maneuvers, and better decision-making. You'll also learn to create
+your own functions to organize your code.
+
+Time Required: 75-90 minutes
+Difficulty: Advanced
+Prerequisites: Lessons 01-11
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Detect when the robot is stuck
+  2. Implement escape maneuvers
+  3. Create custom functions
+  4. Track robot state with variables
+  5. Build a more robust navigation system
+
+
+VOCABULARY
+==========
+  Stuck detection - Recognizing when the robot is NOT making progress.
+                    If the robot hasn't moved forward in 5 seconds,
+                    it's probably stuck!
+
+  Escape maneuver - A special sequence of movements to get out of a
+                    stuck position. Like a 3-point turn when you're
+                    stuck in a dead end.
+
+  Function        - A reusable block of code with a name. Instead of
+                    writing the same code over and over, put it in a
+                    function and call it by name.
+
+  State tracking  - Keeping track of what the robot has been doing.
+                    "How many turns have I made?" "When did I last
+                    move forward?"
+
+  Robust          - Code that handles unexpected situations without
+                    crashing or getting stuck. Good software is robust.
+
+
+NEW CONCEPT: CREATING YOUR OWN FUNCTIONS
+==========================================
+A function is a reusable block of code:
+
+  // Define the function
+  void myFunction() {              // "void" means no return value
+    Serial.println("Hello!");      // Code inside the function
+    car.moveForward(150, 500);     // Can have any commands
+  }
+
+  // Call the function (use it)
+  myFunction();   // Runs all the code inside
+
+  Functions with parameters:
+  void moveDistance(int speed, int time) {
+    car.moveForward(speed, time);
+    delay(300);
+  }
+
+  moveDistance(150, 1000);   // Move at 150 for 1 second
+  moveDistance(200, 500);    // Move at 200 for 0.5 seconds
+
+  Functions that return values:
+  int getMaxDistance() {
+    int left = car.getLeftDistance();
+    int right = car.getRightDistance();
+    if(left > right) return left;
+    else return right;
+  }
+
+  int maxDist = getMaxDistance();  // Stores the result
+
+
+WHY FUNCTIONS MATTER
+====================
+  Without functions:
+    50 lines of navigation code
+    50 lines of the SAME navigation code (copy-pasted)
+    50 lines of the SAME code AGAIN
+    = 150 lines total, hard to maintain
+
+  With functions:
+    50 lines defining the function once
+    1 line to call it the first time
+    1 line to call it the second time
+    1 line to call it the third time
+    = 53 lines total, easy to maintain!
+
+  Also: if you find a bug, you fix it ONCE in the function,
+  and it's fixed everywhere you used it.
+
+
+STUCK DETECTION
+================
+How to know when the robot is stuck:
+
+  Track when the robot last moved forward:
+    unsigned long lastForwardTime = millis();
+
+  Update it every time you move forward:
+    car.moveForward(150, 300);
+    lastForwardTime = millis();    // Reset the timer
+
+  Check if too much time has passed without forward movement:
+    unsigned long timeSinceForward = millis() - lastForwardTime;
+    if(timeSinceForward > 5000) {
+      // No forward movement for 5 seconds = STUCK!
+      escapeManeuver();
+    }
+
+  Also track consecutive turns:
+    int consecutiveTurns = 0;
+
+    // When turning:
+    consecutiveTurns++;
+
+    // When moving forward:
+    consecutiveTurns = 0;    // Reset counter
+
+    // If too many turns:
+    if(consecutiveTurns > 4) {
+      // Probably stuck! Execute escape
+      escapeManeuver();
+    }
+
+
+ESCAPE MANEUVER
+================
+When stuck, use this sequence to break free:
+
+  void escapeManeuver() {
+    Serial.println("!!! STUCK - ESCAPING !!!");
+
+    // Step 1: Back up (move away from whatever blocked you)
+    car.moveBackward(170, 1000);
+    delay(500);
+
+    // Step 2: Turn more than 180 degrees (face a new direction)
+    car.turnRight(170, 1200);
+    delay(500);
+
+    // Step 3: Move forward (get to a new area)
+    car.moveForward(170, 800);
+    delay(500);
+
+    // Step 4: Reset tracking variables
+    consecutiveTurns = 0;
+    lastForwardTime = millis();
+
+    Serial.println("Escape complete!");
+  }
+
+
+IMPROVED DECISION MAKING
+==========================
+Instead of just "left or right," consider HOW MUCH clearer one
+side is:
+
+  int spaceDifference = leftDist - rightDist;
+
+  if(spaceDifference > 10) {
+    // Left is SIGNIFICANTLY clearer (10+ cm more)
+    car.turnLeft(150, 450);
+  } else if(spaceDifference < -10) {
+    // Right is SIGNIFICANTLY clearer
+    car.turnRight(150, 450);
+  } else {
+    // Similar distances - just pick one
+    if(leftDist > rightDist) {
+      car.turnLeft(150, 400);
+    } else {
+      car.turnRight(150, 400);
+    }
+  }
+
+  This is smarter because:
+    - Big differences = big turns (steer well clear)
+    - Small differences = small turns (subtle correction)
+
+
+COMPLETE CODE STRUCTURE
+========================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int SAFE_DISTANCE = 35;
+  const int CRITICAL_DISTANCE = 20;
+  const int MOVE_SPEED = 170;
+  int consecutiveTurns = 0;
+  unsigned long lastForwardTime = 0;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 12: Advanced Obstacle Course");
+    car.setup();
+    car.attachSensorServo(10);
+    car.centerServo();
+    delay(3000);
+  }
+
+  // Custom function: detailed scan
+  void detailedScan(int &left, int &center, int &right) {
+    center = car.getCenterDistance();
+    delay(200);
+    left = car.getLeftDistance();
+    delay(200);
+    right = car.getRightDistance();
+    delay(200);
+    car.centerServo();
+  }
+
+  // Custom function: check if stuck
+  boolean isStuck() {
+    return (millis() - lastForwardTime > 5000);
+  }
+
+  // Custom function: escape
+  void escapeManeuver() {
+    Serial.println("STUCK - ESCAPING!");
+    car.moveBackward(MOVE_SPEED, 1000);
+    delay(500);
+    car.turnRight(MOVE_SPEED, 1200);
+    delay(500);
+    car.moveForward(MOVE_SPEED, 800);
+    delay(500);
+    consecutiveTurns = 0;
+    lastForwardTime = millis();
+  }
+
+  void loop() {
+    Serial.println("=== ADVANCED COURSE RUN (30 sec) ===");
+
+    unsigned long startTime = millis();
+    lastForwardTime = millis();
+    consecutiveTurns = 0;
+    int obstaclesNegotiated = 0;
+
+    while(millis() - startTime < 30000) {
+
+      // Check if stuck
+      if(isStuck()) {
+        escapeManeuver();
+      }
+
+      // Scan
+      int leftDist, centerDist, rightDist;
+      detailedScan(leftDist, centerDist, rightDist);
+
+      // Count obstacles
+      if(centerDist < SAFE_DISTANCE) {
+        obstaclesNegotiated++;
+      }
+
+      // Navigate
+      if(leftDist < CRITICAL_DISTANCE && centerDist < CRITICAL_DISTANCE
+         && rightDist < CRITICAL_DISTANCE) {
+        escapeManeuver();
+      } else if(centerDist > SAFE_DISTANCE) {
+        car.moveForward(MOVE_SPEED, 400);
+        consecutiveTurns = 0;
+        lastForwardTime = millis();
+      } else {
+        int diff = leftDist - rightDist;
+        if(diff > 10) {
+          car.turnLeft(MOVE_SPEED, 450);
+        } else if(diff < -10) {
+          car.turnRight(MOVE_SPEED, 450);
+        } else {
+          car.turnLeft(MOVE_SPEED, 400);
+        }
+        consecutiveTurns++;
+        if(consecutiveTurns > 4) escapeManeuver();
+      }
+
+      delay(150);
+    }
+
+    car.stopMotors();
+    Serial.println("=== COURSE COMPLETE! ===");
+    Serial.print("Obstacles: ");
+    Serial.println(obstaclesNegotiated);
+    delay(10000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Build the Ultimate Navigation System
+
+  Improve the code to handle:
+    1. Adaptive speed based on distance (fast/medium/slow)
+    2. A "spin scan" when very confused (turn slowly while scanning)
+    3. Try to complete a course with 6+ obstacles
+    4. Track and print performance statistics at the end
+
+  Scoring:
+    - Stuck detection works: 20 points
+    - Escape maneuver works: 20 points
+    - Uses custom functions: 20 points
+    - Completes advanced course: 20 points
+    - Clean, organized code: 20 points
+
+
+TEACHER NOTES
+=============
+  - This lesson introduces software engineering concepts (functions,
+    state tracking, code organization)
+  - Have students compare their code to the simpler version in Lesson 11
+  - Discuss: What makes code "better"? (readability, reliability,
+    maintainability)
+  - Create a challenging course with tight spaces to test stuck detection
+  - Competition: which team's robot can handle the hardest course?
+
+=============================================================================
+  END OF LESSON 12
+=============================================================================

@@ -1,0 +1,274 @@
+=============================================================================
+  LESSON 01: FIRST STEPS - MOVING FORWARD
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+This is your very first robotics lesson! You will learn how to make your
+robot car move forward. By the end of this lesson, you will understand
+the basic structure of an Arduino program and be able to control how fast
+and how far your robot moves.
+
+Time Required: 45-60 minutes
+Difficulty: Beginner (No experience needed!)
+Materials: Robot car, USB cable, computer with Arduino IDE
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Include the CarControl library in your program
+  2. Create a robot object in your code
+  3. Make the robot move forward at different speeds
+  4. Stop the robot using code
+  5. Understand what setup() and loop() do
+
+
+VOCABULARY
+==========
+  Library     - A collection of pre-written code that gives you new
+                commands to use. Think of it like an app that adds new
+                features to your phone.
+
+  Object      - A thing in your code that represents something real.
+                In our case, the "car" object represents your robot.
+
+  Speed       - A number from 0 to 255 that controls how fast the
+                motors spin. 0 = stopped, 255 = full speed.
+
+  Duration    - How long something happens, measured in milliseconds.
+                1000 milliseconds = 1 second.
+
+  Function    - A named block of code that does a specific job.
+                setup() and loop() are functions.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  moveForward(speed, duration)
+  ----------------------------
+  What it does:  Makes the robot drive forward in a straight line.
+
+  How to use it: car.moveForward(speed, duration);
+
+  Parameters:
+    speed    - A number from 0 to 255
+               0 = not moving
+               100 = slow
+               180 = medium
+               255 = as fast as possible
+
+    duration - How long to move, in milliseconds
+               500 = half a second
+               1000 = one second
+               2000 = two seconds
+
+  Example:     car.moveForward(150, 2000);
+               This makes the robot move forward at medium speed for
+               2 seconds.
+
+  Real-world comparison:
+    Think of a remote control car. The speed is like how hard you push
+    the joystick forward. The duration is how long you hold it there.
+
+  -------------------------------------------------------------------------
+
+  stopMotors()
+  ------------
+  What it does:  Immediately stops both motors on the robot.
+
+  How to use it: car.stopMotors();
+
+  Parameters:    None! Just call it and the robot stops.
+
+  Example:       car.stopMotors();
+
+  When to use it:
+    - At the end of a movement sequence
+    - When you want to make sure the robot is completely stopped
+    - As a safety measure before starting a new movement
+
+  Real-world comparison:
+    Like pressing the brake pedal in a car. Everything stops.
+
+
+UNDERSTANDING THE CODE STRUCTURE
+================================
+Every Arduino program has two main parts:
+
+  1. setup() - Runs ONE TIME when you turn on the robot or press reset
+     This is where you prepare everything:
+     - Start communication with the computer
+     - Initialize the robot
+     - Set up any sensors
+
+  2. loop() - Runs OVER AND OVER AGAIN forever
+     This is where your robot does its work:
+     - Move forward
+     - Check sensors
+     - Make decisions
+
+  Think of it like a morning routine:
+    setup() = Wake up, get dressed, eat breakfast (do this once)
+    loop()  = Go to class, learn, go to next class (repeat all day)
+
+
+BEFORE THE CODE: WHAT GOES AT THE TOP
+======================================
+
+  #include <CarControl.h>
+    This line tells the Arduino: "I want to use the CarControl library."
+    Without this line, the Arduino won't know any of the robot commands.
+
+  CarControl car(5, 6, 7, 8, 3, 2);
+    This line creates your robot object. The numbers tell the Arduino
+    which pins (electrical connections) are connected to the motors.
+    You don't need to change these numbers - they match how your
+    robot is wired.
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  // Include the CarControl library - gives us all the robot commands
+  #include <CarControl.h>
+
+  // Create a robot object called "car"
+  // The numbers match the wiring of your robot
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  // setup() runs once when the robot turns on
+  void setup() {
+    Serial.begin(9600);                          // Start computer communication
+    Serial.println("Lesson 01: Forward Movement"); // Print a message
+    car.setup();                                  // Initialize the robot
+  }
+
+  // loop() runs over and over forever
+  void loop() {
+    // Move forward slowly for 1 second
+    car.moveForward(100, 1000);
+    delay(2000);              // Wait 2 seconds
+
+    // Move forward at medium speed for 2 seconds
+    car.moveForward(180, 2000);
+    delay(2000);
+
+    // Move forward at maximum speed for 1.5 seconds
+    car.moveForward(255, 1500);
+    delay(2000);
+
+    // Stop the motors
+    car.stopMotors();
+
+    // Wait 5 seconds before repeating
+    delay(5000);
+  }
+
+
+LINE-BY-LINE EXPLANATION
+=========================
+
+  #include <CarControl.h>
+    Loads the library. Like opening a toolbox before you start building.
+
+  CarControl car(5, 6, 7, 8, 3, 2);
+    Creates the robot. Now you can use "car." before any command.
+
+  void setup() {
+    This starts the setup section. "void" means it doesn't give back
+    a value. The curly brace { starts the block of code.
+
+  Serial.begin(9600);
+    Opens a communication channel to your computer at speed 9600.
+    This lets you see messages in the Serial Monitor window.
+
+  Serial.println("Lesson 01: Forward Movement");
+    Prints a message to the Serial Monitor. "println" means
+    "print line" - it prints text and then goes to the next line.
+
+  car.setup();
+    Tells the robot to get ready. This sets up the motor pins
+    and prepares everything for movement.
+
+  car.moveForward(100, 1000);
+    Makes the robot move forward. Speed = 100 (slow), Time = 1000ms
+    (1 second). After 1 second, the robot stops automatically.
+
+  delay(2000);
+    Pauses the program for 2000 milliseconds (2 seconds).
+    The robot does nothing during this time. This gives you time
+    to watch what happened before the next movement.
+
+  car.stopMotors();
+    Makes sure both motors are completely stopped.
+
+
+WHAT TO EXPECT WHEN YOU RUN THIS
+=================================
+  1. Upload the code to your robot
+  2. The robot will move forward slowly for 1 second
+  3. It will pause for 2 seconds
+  4. It will move forward faster for 2 seconds
+  5. It will pause again
+  6. It will move forward at full speed for 1.5 seconds
+  7. It will stop for 5 seconds
+  8. Then it will repeat the whole sequence
+
+  Watch the Serial Monitor to see the messages!
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Three Different Distances
+
+  Modify the code to make your robot move forward THREE different
+  distances:
+
+    1. Short distance   - about 0.5 seconds
+    2. Medium distance  - about 1.5 seconds
+    3. Long distance    - about 3 seconds
+
+  Requirements:
+    - Use a DIFFERENT speed for each movement
+    - Add Serial.println() messages to describe each movement
+    - Add delay() between each movement so you can see them separately
+
+  Hints:
+    - Copy one of the moveForward lines and change the numbers
+    - Try speeds like 80, 150, and 220
+    - Remember: 500 = 0.5 seconds, 1500 = 1.5 seconds, 3000 = 3 seconds
+
+  Example of what to add:
+    Serial.println("Short distance - slow speed");
+    car.moveForward(80, 500);
+    delay(2000);
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Forgetting the semicolon (;) at the end of each line
+  2. Using a capital S in "serial" - it must be "Serial" with a capital S
+  3. Forgetting to call car.setup() in the setup function
+  4. Setting speed higher than 255 (the maximum is 255)
+  5. Forgetting to include the library at the top of the program
+
+
+TEACHER NOTES
+=============
+  - Have students predict what will happen before running the code
+  - Ask students to time the movements with a stopwatch
+  - Challenge students to make the robot travel a specific distance
+    (e.g., "make the robot go exactly 30 cm")
+  - Discuss the relationship between speed, time, and distance
+  - This is a great time to introduce the Serial Monitor tool
+
+=============================================================================
+  END OF LESSON 01
+=============================================================================

@@ -1,0 +1,300 @@
+=============================================================================
+  LESSON 13: LINE SENSOR BASICS
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Up until now, your robot has been navigating using the ultrasonic sensor
+to avoid obstacles. Now you'll learn about a completely different type
+of sensor: LINE SENSORS! These use infrared light to detect dark lines
+on light surfaces. This is the technology behind assembly-line robots,
+warehouse floor-following robots, and competition line-following bots.
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-10 (understanding of variables and if-else)
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Understand how infrared line sensors work
+  2. Read values from three line sensors
+  3. Distinguish between dark and light surfaces
+  4. Use a threshold value to detect lines
+  5. Determine the position of a line relative to the robot
+
+
+VOCABULARY
+==========
+  Infrared (IR) - A type of light that humans can't see. Your TV
+                  remote uses infrared. The line sensors also use
+                  infrared light.
+
+  Reflect       - When light bounces back from a surface. White
+                  surfaces reflect a lot of light. Dark surfaces
+                  absorb light (reflect very little).
+
+  Analog value  - A number that can be anything in a range (0-1023),
+                  not just on/off. The line sensors give analog values.
+                  Higher = more light reflected = lighter surface.
+
+  Threshold     - A dividing line between "on the line" and "off the
+                  line." We pick a number (like 500) and say:
+                  Below 500 = dark (on the line)
+                  Above 500 = light (off the line)
+
+  Calibrate     - Adjusting settings to match your specific environment.
+                  Different floors and lighting need different thresholds.
+
+
+HOW LINE SENSORS WORK
+======================
+
+  Each sensor has two parts:
+    1. An IR LED (light emitter) - shines invisible light at the ground
+    2. A photodetector (light receiver) - measures how much bounces back
+
+  On a WHITE surface:
+    The IR light hits the surface, reflects strongly back, and the
+    sensor reads a HIGH value (800-1023).
+
+    [LED] --> light --> WHITE SURFACE --> reflects back --> [detector]
+    Reading: HIGH (bright, lots of reflection)
+
+  On a BLACK line:
+    The IR light hits the dark surface, gets absorbed, and very little
+    bounces back. The sensor reads a LOW value (0-300).
+
+    [LED] --> light --> BLACK LINE --> absorbed (little returns)
+    Reading: LOW (dark, little reflection)
+
+  Think of it like shining a flashlight:
+    - Aim at a white wall = lots of light bounces back (bright)
+    - Aim at a black shirt = very little light bounces back (dark)
+
+
+THE THREE SENSORS
+==================
+  Your robot has THREE line sensors arranged side by side:
+
+    Left Sensor (A2)    Middle Sensor (A1)    Right Sensor (A0)
+         |                     |                     |
+    [    L    ]  [         M         ]  [    R    ]
+    ------------------------------------------------
+                    ROBOT FRONT
+
+  Why three sensors?
+    With only ONE sensor, you'd know if the robot is on a line or not,
+    but NOT which direction the line went.
+
+    With THREE sensors, you can tell:
+    - Line is in the CENTER (middle sensor reads dark)
+    - Line is to the LEFT (left sensor reads dark)
+    - Line is to the RIGHT (right sensor reads dark)
+    - Line is between CENTER and LEFT (both read dark)
+    - Robot is OFF the line (no sensors read dark)
+
+
+SENSOR VALUES EXPLAINED
+========================
+
+  Raw sensor readings (analog, 0-1023):
+
+  Surface Color   Typical Reading    Meaning
+  --------------- ------------------- ------------------
+  White paper     800-1020           Lots of reflection
+  Light wood      600-800            Moderate reflection
+  Gray surface    400-600            Some reflection
+  Dark surface    200-400            Little reflection
+  Black tape      0-200              Very little reflection
+
+  Choosing a threshold:
+    The threshold should be BETWEEN your white and black readings.
+
+    Example: If your readings are:
+      White floor: ~850
+      Black tape:  ~150
+      Good threshold: 500 (halfway between)
+
+    If your readings are:
+      Light carpet: ~600
+      Black tape:   ~100
+      Good threshold: 350 (halfway between)
+
+  HOW TO FIND YOUR THRESHOLD:
+    1. Place robot on white surface, read all three sensors
+    2. Place robot on black line, read all three sensors
+    3. Your threshold = (white reading + black reading) ÷ 2
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  initLineSensors()
+  -----------------
+  What it does:  Sets up the line sensors for reading.
+  How to use it: car.initLineSensors();
+  When to call:  In setup(), before reading line sensors.
+
+  -------------------------------------------------------------------------
+
+  getLineSensorLeft()
+  -------------------
+  What it does:  Reads the left line sensor.
+  Returns:       Analog value from 0 to 1023.
+  Example:       int leftValue = car.getLineSensorLeft();
+
+  -------------------------------------------------------------------------
+
+  getLineSensorMiddle()
+  ---------------------
+  What it does:  Reads the middle line sensor.
+  Returns:       Analog value from 0 to 1023.
+  Example:       int middleValue = car.getLineSensorMiddle();
+
+  -------------------------------------------------------------------------
+
+  getLineSensorRight()
+  --------------------
+  What it does:  Reads the right line sensor.
+  Returns:       Analog value from 0 to 1023.
+  Example:       int rightValue = car.getLineSensorRight();
+
+
+NEW CONCEPT: BOOLEAN VARIABLES
+===============================
+  A boolean is a variable that can only be TRUE or FALSE.
+  Perfect for "is the sensor on a line? Yes or no."
+
+  boolean leftOnLine  = (leftValue < LINE_THRESHOLD);
+  boolean middleOnLine = (middleValue < LINE_THRESHOLD);
+  boolean rightOnLine  = (rightValue < LINE_THRESHOLD);
+
+  Now you can use these in if-statements:
+    if(middleOnLine) {
+      Serial.println("Center sensor is on the line!");
+    }
+
+
+DETERMINING LINE POSITION
+===========================
+  By checking which sensors detect the line, you can figure out
+  where the line is relative to the robot:
+
+  Left    Middle    Right     Line Position
+  ----    ------    -----     -----------------------
+  OFF     ON        OFF       Centered (perfect!)
+  ON      OFF       OFF       Line is to the LEFT
+  OFF     OFF       ON        Line is to the RIGHT
+  ON      ON        OFF       Slightly left of center
+  OFF     ON        ON        Slightly right of center
+  ON      ON        ON        Wide line or intersection
+  OFF     OFF       OFF       Robot is OFF the line!
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int LINE_THRESHOLD = 500;  // Adjust for your setup!
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 13: Line Sensor Basics");
+    car.setup();
+    car.initLineSensors();    // Initialize line sensors
+    Serial.println("Place robot over different surfaces...");
+    delay(2000);
+  }
+
+  void loop() {
+    // Read all three sensors
+    int leftValue = car.getLineSensorLeft();
+    int middleValue = car.getLineSensorMiddle();
+    int rightValue = car.getLineSensorRight();
+
+    // Print raw values
+    Serial.print("L: ");
+    Serial.print(leftValue);
+    Serial.print(" | M: ");
+    Serial.print(middleValue);
+    Serial.print(" | R: ");
+    Serial.println(rightValue);
+
+    // Determine line position
+    boolean leftOnLine = (leftValue < LINE_THRESHOLD);
+    boolean middleOnLine = (middleValue < LINE_THRESHOLD);
+    boolean rightOnLine = (rightValue < LINE_THRESHOLD);
+
+    Serial.print("Line position: ");
+    if(middleOnLine && !leftOnLine && !rightOnLine) {
+      Serial.println("CENTER");
+    } else if(leftOnLine && !rightOnLine) {
+      Serial.println("LEFT");
+    } else if(rightOnLine && !leftOnLine) {
+      Serial.println("RIGHT");
+    } else if(leftOnLine && middleOnLine && rightOnLine) {
+      Serial.println("INTERSECTION");
+    } else {
+      Serial.println("OFF LINE");
+    }
+
+    delay(500);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Line Sensor Calibrator
+
+  Create a program that:
+    1. Reads all three sensors continuously
+    2. Prints the raw values (for calibration)
+    3. Detects when the robot is on a black line (print "ON LINE")
+    4. Detects when the robot is on white (print "OFF LINE")
+    5. Shows which sensor(s) see the line
+
+  Then do the calibration:
+    1. Place robot on white surface - note the values
+    2. Place robot on black tape - note the values
+    3. Calculate your ideal threshold
+    4. Update LINE_THRESHOLD with your value
+    5. Test again to confirm it works
+
+  Bonus Challenges:
+    1. Create a visual bar graph using asterisks (*)
+       for each sensor reading in the Serial Monitor
+    2. Add a "line direction" indicator:
+       <-- (line is left), === (centered), --> (line is right)
+    3. Make the robot beep differently when on or off the line
+
+
+TIPS FOR GOOD LINE DETECTION
+==============================
+  1. Black electrical tape on a white surface works best
+  2. Keep sensors about 1-2 cm above the surface
+  3. Avoid shadows over the sensors (affects readings)
+  4. Recalibrate if you change to a different surface
+  5. Fluorescent lights can affect IR sensors - test in your room
+
+
+TEACHER NOTES
+=============
+  - Create test tracks with black tape on white posterboard
+  - Have students record readings on different surfaces
+  - This is the foundation for Lesson 14 (line following)
+  - Great opportunity to discuss analog vs digital signals
+  - Discuss real-world applications: assembly line robots follow
+    painted lines on factory floors
+
+=============================================================================
+  END OF LESSON 13
+=============================================================================

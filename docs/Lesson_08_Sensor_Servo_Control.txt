@@ -1,0 +1,261 @@
+=============================================================================
+  LESSON 08: LOOKING AROUND - SENSOR SERVO CONTROL
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Right now your ultrasonic sensor only looks straight ahead. What if
+there's a wall to the left but open space to the right? Your robot
+wouldn't know! In this lesson, you'll learn to control the servo motor
+that holds the sensor, allowing your robot to "look around" - just
+like turning your head to check for traffic before crossing a street.
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-07
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Control the sensor servo to look left, center, and right
+  2. Take distance measurements from multiple directions
+  3. Compare distances to find the clearest path
+  4. Make the robot turn toward the direction with most space
+  5. Perform a complete environmental scan
+
+
+VOCABULARY
+==========
+  Servo motor - A special motor that can move to a specific angle
+                and hold that position. Unlike regular motors that
+                just spin, servos go to exact positions.
+
+  Sweep       - Moving the servo from one side to the other.
+                Like slowly turning your head from left to right.
+
+  Scan        - Checking multiple directions for obstacles.
+                Like looking both ways before crossing a street.
+
+  Environment - Everything around the robot. Walls, objects, open
+                spaces. Scanning lets the robot understand its
+                environment.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  attachSensorServo(pin)
+  ----------------------
+  What it does:  Connects the sensor servo to the Arduino.
+  How to use it: car.attachSensorServo(10);
+  When to call:  In setup(), before using any servo commands.
+  The pin:       Usually pin 10 on our robot.
+
+  -------------------------------------------------------------------------
+
+  lookLeft()
+  ----------
+  What it does:  Turns the sensor to look to the robot's LEFT side.
+  How to use it: car.lookLeft();
+  Angle:         Points sensor to approximately 0 degrees.
+
+  -------------------------------------------------------------------------
+
+  lookRight()
+  -----------
+  What it does:  Turns the sensor to look to the robot's RIGHT side.
+  How to use it: car.lookRight();
+  Angle:         Points sensor to approximately 180 degrees.
+
+  -------------------------------------------------------------------------
+
+  centerServo()
+  -------------
+  What it does:  Points the sensor straight ahead.
+  How to use it: car.centerServo();
+  Angle:         Points sensor to 90 degrees (center).
+  When to use:   Always recenter after looking left or right!
+
+  -------------------------------------------------------------------------
+
+  getLeftDistance()
+  ----------------
+  What it does:  Looks left AND measures the distance in one step.
+  Returns:       Distance in cm to whatever is on the left.
+  How to use:    int leftDist = car.getLeftDistance();
+
+  -------------------------------------------------------------------------
+
+  getRightDistance()
+  -----------------
+  What it does:  Looks right AND measures the distance in one step.
+  Returns:       Distance in cm to whatever is on the right.
+  How to use:    int rightDist = car.getRightDistance();
+
+  -------------------------------------------------------------------------
+
+  getCenterDistance()
+  ------------------
+  What it does:  Looks center AND measures the distance in one step.
+  Returns:       Distance in cm to whatever is ahead.
+  How to use:    int centerDist = car.getCenterDistance();
+
+
+IMPORTANT: SERVO TIMING
+========================
+  Servo motors need TIME to physically move to a new position.
+  If you read the sensor immediately after moving the servo,
+  you might get an incorrect reading because the sensor hasn't
+  finished turning yet.
+
+  Solution: Add a delay after moving the servo!
+
+  car.lookLeft();
+  delay(500);  // Wait for servo to finish moving
+  int distance = car.getDistanceToObstacle();  // NOW read
+
+  The getLeftDistance(), getRightDistance(), and getCenterDistance()
+  functions handle this automatically - another reason to use them!
+
+
+THE SCANNING STRATEGY
+======================
+  A complete scan checks three directions:
+
+    1. Look LEFT and measure distance
+    2. Look CENTER and measure distance
+    3. Look RIGHT and measure distance
+
+  Then compare the three numbers to find the clearest path:
+
+    if(leftDist > centerDist && leftDist > rightDist) {
+      // Left has the most space - turn left!
+    } else if(rightDist > centerDist && rightDist > leftDist) {
+      // Right has the most space - turn right!
+    } else {
+      // Center has the most space - go straight!
+    }
+
+  This is the foundation of obstacle avoidance!
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 08: Sensor Servo Control");
+    car.setup();
+    car.attachSensorServo(10);   // Connect sensor servo
+    Serial.println("The sensor will look around!");
+  }
+
+  void loop() {
+    // Example 1: Looking in all directions
+    Serial.println("Looking LEFT");
+    car.lookLeft();
+    delay(1000);
+
+    Serial.println("Looking CENTER");
+    car.centerServo();
+    delay(1000);
+
+    Serial.println("Looking RIGHT");
+    car.lookRight();
+    delay(1000);
+
+    car.centerServo();
+    delay(2000);
+
+    // Example 2: Scan and measure
+    Serial.println("Scanning for distances...");
+
+    int leftDist = car.getLeftDistance();
+    Serial.print("Left: ");
+    Serial.print(leftDist);
+    Serial.println(" cm");
+
+    int centerDist = car.getCenterDistance();
+    Serial.print("Center: ");
+    Serial.print(centerDist);
+    Serial.println(" cm");
+
+    int rightDist = car.getRightDistance();
+    Serial.print("Right: ");
+    Serial.print(rightDist);
+    Serial.println(" cm");
+
+    car.centerServo();
+
+    // Example 3: Find the clearest path
+    Serial.println("Finding clearest path...");
+
+    if(leftDist > centerDist && leftDist > rightDist) {
+      Serial.println("Clearest path: LEFT");
+      car.turnLeft(150, 500);
+    } else if(rightDist > centerDist && rightDist > leftDist) {
+      Serial.println("Clearest path: RIGHT");
+      car.turnRight(150, 500);
+    } else {
+      Serial.println("Clearest path: CENTER");
+      car.moveForward(150, 500);
+    }
+
+    delay(2000);
+    car.centerServo();
+    delay(3000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: The Path Finder
+
+  Create a program that navigates 5 steps using scanning:
+
+    For each step:
+      1. Scan left, center, and right
+      2. Print all three distances
+      3. Determine which direction has the most space
+      4. If center is clearest and > 30cm, move forward
+      5. If left is clearest, turn left then move forward
+      6. If right is clearest, turn right then move forward
+      7. If NO direction has at least 30cm, turn around
+      8. After moving, scan again
+
+  Bonus Challenges:
+    1. Create a "danger meter" that prints:
+       - "DANGER!" if any distance < 15 cm
+       - "Caution" if any distance < 30 cm
+       - "All clear!" if all distances > 50 cm
+    2. Make the robot navigate for 30 seconds autonomously
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Forgetting to call attachSensorServo(10) in setup
+  2. Not waiting for the servo to finish moving before reading
+  3. Forgetting to recenter the servo after scanning
+  4. Reading the sensor without moving the servo first
+
+
+TEACHER NOTES
+=============
+  - Set up a simple obstacle course for scanning practice
+  - Have students predict distances before scanning
+  - Discuss: Why is scanning important for autonomous robots?
+  - Connect to real-world: self-driving cars use similar scanning
+  - This lesson introduces multi-sensor decision making
+
+=============================================================================
+  END OF LESSON 08
+=============================================================================

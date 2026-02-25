@@ -1,0 +1,308 @@
+=============================================================================
+  LESSON 04: TURNING LEFT AND RIGHT
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+So far your robot can only move in straight lines. Time to change that!
+In this lesson, you'll learn how to turn your robot left and right.
+By combining turns with forward movement, your robot can navigate
+anywhere - just like a real car!
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-03
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Turn the robot left and right
+  2. Understand how the motors create a turn
+  3. Combine turning with forward movement
+  4. Estimate how long to turn for specific angles (90 degrees, etc.)
+  5. Create a square driving pattern
+
+
+VOCABULARY
+==========
+  Rotation    - Spinning in place. The robot turns without moving
+                forward or backward.
+
+  Clockwise   - Turning to the RIGHT, like clock hands move.
+                (Think: the top of the robot moves to the right)
+
+  Counter-    - Turning to the LEFT, opposite of clock hands.
+  clockwise     (Think: the top of the robot moves to the left)
+
+  Degrees     - A way to measure how much you turn.
+                90 degrees = a quarter turn (right angle)
+                180 degrees = half turn (facing opposite direction)
+                360 degrees = full turn (back where you started)
+
+  Right angle - A 90-degree turn. The corners of a square are all
+                right angles. This is the most common turn you'll use.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  turnLeft(speed, duration)
+  -------------------------
+  What it does:  Makes the robot spin to the LEFT (counterclockwise).
+
+  How to use it: car.turnLeft(speed, duration);
+
+  Parameters:
+    speed    - How fast to turn (0-255). Higher = faster turning.
+    duration - How long to turn, in milliseconds.
+
+  Example:     car.turnLeft(150, 500);
+               Turns left at medium speed for 0.5 seconds.
+               This is approximately a 90-degree turn on most robots.
+
+  How it works:
+    To turn LEFT, the robot's right motor spins FORWARD and the left
+    motor spins BACKWARD. This makes the robot spin in place, like
+    a spinning top.
+
+    Right wheel goes forward    -->  Robot turns left
+    Left wheel goes backward    <--
+
+  -------------------------------------------------------------------------
+
+  turnRight(speed, duration)
+  --------------------------
+  What it does:  Makes the robot spin to the RIGHT (clockwise).
+
+  How to use it: car.turnRight(speed, duration);
+
+  Parameters:
+    speed    - How fast to turn (0-255).
+    duration - How long to turn, in milliseconds.
+
+  Example:     car.turnRight(150, 500);
+               Turns right at medium speed for 0.5 seconds.
+
+  How it works:
+    To turn RIGHT, the left motor spins FORWARD and the right motor
+    spins BACKWARD. Opposite of a left turn!
+
+    Left wheel goes forward     -->  Robot turns right
+    Right wheel goes backward   <--
+
+
+UNDERSTANDING ANGLES AND DURATION
+==================================
+The longer you turn, the more degrees the robot rotates:
+
+  Duration (approximate, at speed 150):
+    250 ms ≈  45 degrees (1/8 of a full turn)
+    500 ms ≈  90 degrees (1/4 of a full turn - right angle)
+    750 ms ≈ 135 degrees (3/8 of a full turn)
+   1000 ms ≈ 180 degrees (1/2 of a full turn - U-turn)
+   2000 ms ≈ 360 degrees (full turn - back to start)
+
+  IMPORTANT: These are ESTIMATES! Every robot is slightly different.
+  You MUST test your robot to find the exact values.
+
+  How to calibrate your turns:
+    1. Place robot facing a wall or tape line on the floor
+    2. Run turnRight(150, 500);
+    3. Measure how far it turned
+    4. If it turned less than 90 degrees, increase the time
+    5. If it turned more than 90 degrees, decrease the time
+    6. Write down your 90-degree value - you'll use it a lot!
+
+
+COMBINING TURNS WITH FORWARD MOVEMENT
+======================================
+A turn by itself just spins the robot in place. To actually go
+somewhere new, you combine turns with forward movement:
+
+  // Go forward, turn right, go forward (makes an "L" shape)
+  car.moveForward(180, 1000);  // Go straight
+  delay(300);                   // Brief pause
+  car.turnRight(150, 500);     // Turn 90 degrees right
+  delay(300);                   // Brief pause
+  car.moveForward(180, 1000);  // Go straight in new direction
+
+  This is how your robot navigates! Every path is just a series of:
+    1. Go forward some distance
+    2. Turn some angle
+    3. Go forward some more
+    4. Repeat!
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 04: Turning Left and Right");
+    car.setup();
+    Serial.println("TIP: Watch how long it takes to turn 90 degrees!");
+  }
+
+  void loop() {
+    // Example 1: Simple left turn
+    Serial.println("Turning left");
+    car.turnLeft(150, 500);      // Turn left for 0.5 seconds
+    delay(2000);
+
+    // Example 2: Simple right turn
+    Serial.println("Turning right");
+    car.turnRight(150, 500);     // Turn right for 0.5 seconds
+    delay(2000);
+
+    // Example 3: Move forward then turn (L-shape)
+    Serial.println("Move and turn (making an L)");
+    car.moveForward(180, 1000);  // Forward
+    delay(500);
+    car.turnRight(150, 500);     // Turn right 90 degrees
+    delay(500);
+    car.moveForward(180, 1000);  // Forward in new direction
+    delay(2000);
+
+    // Example 4: First corner of a square
+    Serial.println("First corner of a square");
+    car.moveForward(180, 1000);  // Side 1
+    delay(300);
+    car.turnRight(150, 500);     // Corner
+    delay(300);
+    car.moveForward(180, 1000);  // Side 2
+    delay(2000);
+
+    // Example 5: Spinning!
+    Serial.println("Spinning right for 2 seconds!");
+    car.turnRight(180, 2000);    // Full spin right
+    delay(1000);
+    Serial.println("Spinning left for 2 seconds!");
+    car.turnLeft(180, 2000);     // Full spin left
+    delay(2000);
+
+    car.stopMotors();
+    delay(5000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  MAIN CHALLENGE: Make a Square!
+
+  Program your robot to drive in a PERFECT SQUARE pattern.
+
+  A square has:
+    - 4 equal sides
+    - 4 right-angle turns (90 degrees each)
+
+  The algorithm (step-by-step plan):
+    Step 1: Move forward (Side 1)
+    Step 2: Turn right 90 degrees
+    Step 3: Move forward (Side 2)
+    Step 4: Turn right 90 degrees
+    Step 5: Move forward (Side 3)
+    Step 6: Turn right 90 degrees
+    Step 7: Move forward (Side 4)
+    Step 8: Turn right 90 degrees (back to start!)
+
+  Code Template:
+    void loop() {
+      Serial.println("Drawing a square!");
+
+      // Side 1
+      Serial.println("Side 1");
+      car.moveForward(180, 1000);
+      delay(300);
+      car.turnRight(150, _____);    // Find your 90-degree time!
+      delay(300);
+
+      // Side 2
+      Serial.println("Side 2");
+      car.moveForward(180, 1000);
+      delay(300);
+      car.turnRight(150, _____);
+      delay(300);
+
+      // Side 3
+      Serial.println("Side 3");
+      car.moveForward(180, 1000);
+      delay(300);
+      car.turnRight(150, _____);
+      delay(300);
+
+      // Side 4
+      Serial.println("Side 4");
+      car.moveForward(180, 1000);
+      delay(300);
+      car.turnRight(150, _____);
+      delay(300);
+
+      Serial.println("Square complete!");
+      delay(5000);
+    }
+
+  Steps to complete:
+    1. First, find your 90-degree turn time
+       - Try car.turnRight(150, 500); and see if it's 90 degrees
+       - Adjust up or down until you get it right
+    2. Fill in the blank _____ with your 90-degree time
+    3. Test the full square
+    4. Adjust the forward time so all sides look equal
+
+  Bonus Challenges:
+    1. Make a TRIANGLE (3 sides, 120-degree turns)
+    2. Make a RECTANGLE (2 long sides, 2 short sides)
+    3. Make your robot drive the square TWICE in a row
+    4. Make the square using LEFT turns instead of right turns
+
+
+MATH CONNECTION
+===============
+  For any regular shape (all sides equal, all angles equal):
+
+  Turn angle = 360 ÷ number of sides
+
+  Triangle:  360 ÷ 3 = 120 degrees per turn
+  Square:    360 ÷ 4 = 90 degrees per turn
+  Pentagon:  360 ÷ 5 = 72 degrees per turn
+  Hexagon:   360 ÷ 6 = 60 degrees per turn
+
+  So if you know your 90-degree turn time, you can calculate others:
+    If 90 degrees = 500 ms:
+    120 degrees = 500 × (120/90) = 667 ms
+    60 degrees  = 500 × (60/90)  = 333 ms
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Not adding delays between movements and turns
+  2. Using different forward times for each side of the square
+     (all sides should be the same!)
+  3. Not calibrating the 90-degree turn first
+  4. Confusing left and right (it happens to everyone!)
+  5. Making the robot go too fast for accurate turns
+
+
+TEACHER NOTES
+=============
+  - Have students find their 90-degree turn time FIRST before
+    attempting the square challenge
+  - Create a class calibration chart for different speeds
+  - Use tape on the floor to mark the square path
+  - Discuss: What happens if the battery is low? (turns get shorter)
+  - Great lesson for introducing geometry concepts
+  - Pair students: one holds a stopwatch, other watches angles
+  - Extension: Have students calculate the perimeter of their square
+
+=============================================================================
+  END OF LESSON 04
+=============================================================================

@@ -1,0 +1,238 @@
+=============================================================================
+  LESSON 05: ADVANCED ROTATION
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+You can turn left and right - great! Now let's master precise angles
+and learn a new shortcut command: turnAround(). You'll also learn to
+create geometric shapes like hexagons and octagons using math and loops.
+This is where programming starts to feel really powerful!
+
+Time Required: 60-75 minutes
+Difficulty: Intermediate
+Prerequisites: Lessons 01-04
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Use the turnAround() command
+  2. Turn to specific angles (45, 90, 120, 180 degrees)
+  3. Create geometric shapes using loops
+  4. Calculate turn durations using math
+  5. Use a "for loop" to repeat actions
+
+
+VOCABULARY
+==========
+  turnAround  - A 180-degree turn. You end up facing the exact
+                opposite direction.
+
+  Angle       - How much you rotate, measured in degrees.
+                Like a slice of a pie - bigger angle = bigger slice.
+
+  For loop    - A way to repeat code a specific number of times.
+                Instead of writing the same code 8 times, you write
+                it once and tell the computer to repeat it 8 times.
+
+  Polygon     - A shape made of straight lines. Triangles, squares,
+                pentagons, hexagons, and octagons are all polygons.
+
+  Iteration   - One pass through a loop. If a loop runs 6 times,
+                that's 6 iterations.
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  turnAround()
+  -------------
+  What it does:  Makes the robot do a complete 180-degree turn.
+                 After this command, the robot faces the opposite
+                 direction from where it was pointing.
+
+  How to use it: car.turnAround();
+
+  Parameters:    None! The robot automatically turns 180 degrees.
+
+  Example:       car.moveForward(180, 2000);  // Go forward
+                 car.turnAround();             // Face the other way
+                 car.moveForward(180, 2000);  // Go "back" to start
+
+  When to use it:
+    - When you want to reverse direction
+    - When you've reached a dead end
+    - When you want to "go home" the way you came
+
+  Real-world comparison:
+    Making a U-turn on a road. You end up going the opposite direction
+    on the same road.
+
+
+NEW CONCEPT: THE FOR LOOP
+==========================
+A "for loop" repeats a block of code a specific number of times.
+
+  Basic structure:
+    for(int i = 0; i < numberOfTimes; i++) {
+      // Code to repeat goes here
+    }
+
+  Breaking it down:
+    int i = 0        - Start counting at 0
+    i < numberOfTimes - Keep going while i is less than our target
+    i++              - Add 1 to i each time through the loop
+
+  Example - Print "Hello" 5 times:
+    for(int i = 0; i < 5; i++) {
+      Serial.println("Hello!");
+    }
+
+  Example - Draw a square (4 sides):
+    for(int i = 0; i < 4; i++) {
+      car.moveForward(180, 1000);  // One side
+      delay(300);
+      car.turnRight(150, 500);     // 90-degree turn
+      delay(300);
+    }
+
+  Why use a loop?
+    Without a loop: 8 lines of code for a square (4 sides x 2 commands)
+    With a loop: 4 lines of code for a square
+    For an octagon: Without loop = 16 lines. With loop = still 4 lines!
+
+
+ANGLE CALCULATION FOR ANY SHAPE
+================================
+  To draw any regular polygon (equal sides, equal angles):
+
+  Turn angle = 360 ÷ number of sides
+
+  Shape         Sides    Turn Angle    Approx Duration (at speed 150)
+  ------------- -------- ------------- --------------------------------
+  Triangle      3        120 degrees   ~667 ms
+  Square        4        90  degrees   ~500 ms
+  Pentagon      5        72  degrees   ~400 ms
+  Hexagon       6        60  degrees   ~333 ms
+  Octagon       8        45  degrees   ~250 ms
+
+  To calculate duration from angle:
+    If 90 degrees = 500 ms for your robot, then:
+    Duration = (target angle ÷ 90) × 500
+
+    For 60 degrees: (60 ÷ 90) × 500 = 333 ms
+    For 45 degrees: (45 ÷ 90) × 500 = 250 ms
+    For 120 degrees: (120 ÷ 90) × 500 = 667 ms
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 05: Advanced Rotation");
+    car.setup();
+  }
+
+  void loop() {
+    // Example 1: Using turnAround()
+    Serial.println("Example 1: Turn around (180 degrees)");
+    car.moveForward(180, 1000);  // Go forward
+    delay(500);
+    car.turnAround();            // 180-degree turn
+    delay(500);
+    car.moveForward(180, 1000);  // Go back to start
+    delay(2000);
+
+    // Example 2: Hexagon (6 sides)
+    Serial.println("Example 2: Drawing a hexagon");
+    for(int i = 0; i < 6; i++) {
+      Serial.print("  Side ");
+      Serial.println(i + 1);
+      car.moveForward(150, 800);   // One side
+      delay(200);
+      car.turnRight(150, 333);     // 60-degree turn
+      delay(200);
+    }
+    delay(2000);
+
+    // Example 3: Star pattern (5 points)
+    Serial.println("Example 3: Drawing a star");
+    for(int i = 0; i < 5; i++) {
+      car.moveForward(180, 1000);  // Long line
+      delay(200);
+      car.turnRight(150, 800);     // 144-degree turn
+      delay(200);
+    }
+    delay(2000);
+
+    // Example 4: Octagon (8 sides)
+    Serial.println("Example 4: Drawing an octagon");
+    for(int i = 0; i < 8; i++) {
+      car.moveForward(150, 600);   // One side
+      delay(100);
+      car.turnRight(150, 250);     // 45-degree turn
+      delay(100);
+    }
+    delay(2000);
+
+    car.stopMotors();
+    delay(5000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  MAIN CHALLENGE: Create an Octagon
+
+  An octagon has 8 equal sides and 8 equal angles (45 degrees each).
+
+  Your mission:
+    1. Make your robot drive in a perfect octagon
+    2. All 8 sides must be equal length
+    3. All 8 turns must be 45 degrees
+    4. Robot should end where it started
+
+  Requirements:
+    - Use a for loop
+    - Print which side you're on (1 through 8)
+    - Add appropriate delays between movements
+
+  Bonus Challenges:
+    1. Create a PENTAGON (5 sides, 72-degree turns)
+    2. Create a function called drawShape() that takes the number
+       of sides as input and draws ANY regular polygon
+    3. Draw an octagon forward, then draw another one backward
+    4. Create a "flower pattern" by drawing 8 small squares
+       rotated 45 degrees from each other
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Forgetting that the for loop counter starts at 0, not 1
+  2. Using < instead of <= (or vice versa) in the loop condition
+  3. Not adjusting turn duration for different angles
+  4. Forgetting the i++ at the end of the for loop
+
+
+TEACHER NOTES
+=============
+  - This is a great lesson for cross-curricular math connections
+  - Have students calculate angles before programming
+  - Create a class chart: "angle to duration" for each robot
+  - Introduce the concept of code reuse through loops
+  - Challenge: Which group can create the most precise octagon?
+  - Extension: Discuss interior vs exterior angles of polygons
+
+=============================================================================
+  END OF LESSON 05
+=============================================================================

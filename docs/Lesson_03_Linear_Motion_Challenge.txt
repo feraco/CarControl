@@ -1,0 +1,259 @@
+=============================================================================
+  LESSON 03: LINEAR MOTION CHALLENGE
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+You've learned to move forward and backward. Now it's time to put those
+skills to the test! In this lesson, you'll plan movement sequences to
+navigate your robot to specific positions, like a GPS guiding a car.
+This is your first real challenge - can you make the robot go exactly
+where you want it to?
+
+Time Required: 60-75 minutes
+Difficulty: Beginner-Intermediate
+Prerequisites: Lessons 01 and 02
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Plan a sequence of movements on paper before coding
+  2. Navigate to specific positions using forward and backward
+  3. Return the robot to its starting position
+  4. Adjust speed and timing for precision parking
+  5. Use the delay() function strategically
+
+
+VOCABULARY
+==========
+  Navigation  - Planning and following a route to get somewhere.
+                Like using Google Maps for your robot.
+
+  Precision   - Being exact and accurate. Making the robot stop
+                at exactly the right spot.
+
+  Checkpoint  - A specific point along a route where you pause
+                or verify your position.
+
+  Calibration - Testing and adjusting your code so the robot
+                does exactly what you want. Robots aren't perfect,
+                so you'll need to tune your numbers.
+
+
+COMMANDS REVIEW
+===============
+  All commands from Lessons 01 and 02:
+
+  moveForward(speed, duration)    Drive forward
+  moveBackward(speed, duration)   Drive backward
+  stopMotors()                    Stop all movement
+  delay(milliseconds)             Pause the program
+
+  New way to think about delay():
+    delay() isn't just for pausing! You can use it to:
+    - Create a countdown before the robot starts
+    - Simulate "stopping at a checkpoint"
+    - Give yourself time to observe the robot's position
+
+
+KEY CONCEPT: PLANNING YOUR ROUTE
+=================================
+Good programmers plan BEFORE they code. Here's how:
+
+  Step 1: Draw your route on paper
+    - Mark the starting point
+    - Mark each checkpoint or destination
+    - Draw arrows showing direction of travel
+
+  Step 2: Estimate distances and times
+    - At speed 180, the robot moves about 15-20 cm per second
+      (this varies by robot - you'll need to test!)
+    - If checkpoint 1 is 30 cm away, you need about 1.5-2 seconds
+
+  Step 3: Write the code
+    - One moveForward() or moveBackward() for each segment
+    - Add delays at checkpoints
+    - Add Serial.println() messages for tracking
+
+  Step 4: Test and adjust
+    - Run the code and observe where the robot actually goes
+    - Adjust speed and duration values until it's right
+    - This is called CALIBRATION and it's a critical robotics skill!
+
+
+KEY CONCEPT: RETURNING TO START
+================================
+To return to the starting position, you need to reverse your movements:
+
+  Going out:
+    car.moveForward(180, 2000);   // Forward 2 seconds
+
+  Coming back:
+    car.moveBackward(180, 2000);  // Backward 2 seconds (same speed & time)
+
+  If you went forward in multiple segments:
+    car.moveForward(150, 1000);   // Segment 1: 1 second
+    car.moveForward(150, 1500);   // Segment 2: 1.5 seconds
+    car.moveForward(150, 1000);   // Segment 3: 1 second
+
+  To return, add up all the times: 1000 + 1500 + 1000 = 3500ms
+    car.moveBackward(150, 3500);  // Go back the total time
+
+  Math tip: Distance = Speed x Time
+    If you use the same speed going forward and backward, just match
+    the total time and you'll end up back at the start!
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 03: Linear Motion Challenge");
+    car.setup();
+  }
+
+  void loop() {
+    // MISSION 1: There and Back
+    Serial.println("Mission 1: There and Back");
+    Serial.println("Step 1: Moving forward to target");
+    car.moveForward(180, 2000);     // Go forward 2 seconds
+
+    Serial.println("Step 2: Pausing at target");
+    delay(1000);                     // Wait at target (1 second)
+
+    Serial.println("Step 3: Returning to start");
+    car.moveBackward(180, 2000);    // Return (same speed and time)
+
+    Serial.println("Mission 1 complete!");
+    delay(3000);
+
+    // MISSION 2: Three-Point Navigation
+    Serial.println("Mission 2: Three-Point Navigation");
+
+    Serial.println("Moving to Point 1");
+    car.moveForward(150, 1000);     // 1 second forward
+    delay(1000);                     // Pause at Point 1
+
+    Serial.println("Moving to Point 2");
+    car.moveForward(150, 1500);     // 1.5 seconds more forward
+    delay(1000);                     // Pause at Point 2
+
+    Serial.println("Moving to Point 3");
+    car.moveForward(150, 1000);     // 1 more second forward
+    delay(1000);                     // Pause at Point 3
+
+    Serial.println("Returning to start");
+    car.moveBackward(150, 3500);    // Total: 1000+1500+1000 = 3500
+
+    Serial.println("Mission 2 complete!");
+    delay(3000);
+
+    // MISSION 3: Precision Parking
+    Serial.println("Mission 3: Precision Parking");
+    car.moveForward(255, 1500);     // Move forward quickly
+    delay(500);
+    car.moveBackward(100, 300);     // Back up a little (slow)
+    delay(500);
+    car.moveForward(80, 200);       // Final adjustment (very slow)
+
+    Serial.println("Parked!");
+    car.stopMotors();
+    delay(5000);
+  }
+
+
+STUDENT CHALLENGE
+=================
+
+  MAIN CHALLENGE: The Checkpoint Course
+
+  Set up a simple course on the floor using tape, cups, or markers:
+
+    START -----> Checkpoint 1 -----> Checkpoint 2 -----> FINISH
+    (0 cm)       (30 cm)              (50 cm)            (90 cm)
+
+  Your robot must:
+    1. Move from Start to Checkpoint 1 (pause 1 second)
+    2. Move from Checkpoint 1 to Checkpoint 2 (pause 1 second)
+    3. Move from Checkpoint 2 to Finish Line (pause 2 seconds)
+    4. Return to Start using backward movement
+
+  Requirements:
+    - Use different speeds for each segment
+    - Print a message at each checkpoint
+    - Stop precisely at each checkpoint (test and adjust!)
+    - Return exactly to the start position
+
+  Starter Template:
+    void loop() {
+      // Countdown!
+      Serial.println("3...");
+      delay(1000);
+      Serial.println("2...");
+      delay(1000);
+      Serial.println("1...");
+      delay(1000);
+      Serial.println("GO!");
+
+      // Segment 1: Start to Checkpoint 1 (30 cm)
+      car.moveForward(_____, _____);  // Fill in speed and time
+      delay(1000);
+      Serial.println("Checkpoint 1 reached!");
+
+      // Segment 2: Checkpoint 1 to Checkpoint 2 (20 cm more)
+      car.moveForward(_____, _____);  // Fill in speed and time
+      delay(1000);
+      Serial.println("Checkpoint 2 reached!");
+
+      // Segment 3: Checkpoint 2 to Finish (40 cm more)
+      car.moveForward(_____, _____);  // Fill in speed and time
+      delay(2000);
+      Serial.println("FINISH LINE!");
+
+      // Return to start
+      car.moveBackward(_____, _____);  // Fill in speed and time
+      Serial.println("Back at start!");
+
+      delay(5000);
+    }
+
+  Bonus Challenges:
+    1. Add a countdown before the robot starts (3... 2... 1... GO!)
+    2. Make the robot approach the finish line fast, then slow down
+       for "precision parking"
+    3. Calculate and print the total distance traveled
+
+
+TIPS FOR SUCCESS
+================
+  1. Start with rough estimates, then fine-tune
+  2. Run the code many times, adjusting numbers each time
+  3. Measure the actual distances with a ruler
+  4. Write down what speed and time gives you what distance
+  5. Be patient - precision takes practice!
+
+
+TEACHER NOTES
+=============
+  - Set up the checkpoint course before class starts
+  - Have students work in pairs (one watches, one programs)
+  - Create a "Calibration Chart" on the board:
+      Speed 100 for 1 second = ___ cm
+      Speed 150 for 1 second = ___ cm
+      Speed 200 for 1 second = ___ cm
+  - Have each pair contribute measurements to build the chart
+  - Discuss: Why might different robots give different results?
+    (battery level, surface friction, wheel alignment)
+
+=============================================================================
+  END OF LESSON 03
+=============================================================================

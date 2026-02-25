@@ -1,0 +1,290 @@
+=============================================================================
+  LESSON 11: SIMPLE OBSTACLE COURSE
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Time to put your obstacle avoidance skills to the real test! In this
+lesson, you'll set up and navigate a structured obstacle course. Unlike
+the previous lesson where you learned concepts, this lesson is all about
+PERFORMANCE - tuning your robot to navigate reliably and efficiently
+through a course.
+
+Time Required: 75-90 minutes
+Difficulty: Intermediate-Advanced
+Prerequisites: Lessons 01-10
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Set up and navigate a structured obstacle course
+  2. Tune configuration values for reliable navigation
+  3. Use timing and statistics to measure performance
+  4. Implement a complete navigation algorithm
+  5. Debug and improve autonomous behavior
+
+
+VOCABULARY
+==========
+  Tuning      - Adjusting values to get the best performance.
+                Like tuning a guitar - small changes make a big
+                difference.
+
+  Configuration - Settings that control how the robot behaves.
+                  SAFE_DISTANCE, MOVE_SPEED, TURN_DURATION are
+                  all configuration values.
+
+  Robust      - Working well under different conditions. A robust
+                program handles unexpected situations gracefully.
+
+  Statistics  - Numbers that measure performance. "Obstacles avoided"
+                and "time to complete" are statistics.
+
+
+KEY CONFIGURATION VALUES
+=========================
+These values control your robot's behavior. Adjusting them is the key
+to successful obstacle course navigation:
+
+  SAFE_DISTANCE (default: 30 cm)
+    - How close the robot gets before it considers something an obstacle
+    - Too low (10): Robot gets too close and might crash
+    - Too high (50): Robot turns too often, wastes time
+    - Sweet spot: 25-35 cm for most courses
+
+  TURN_DURATION (default: 500 ms)
+    - How long the robot turns when avoiding an obstacle
+    - Too low (200): Turn isn't enough, robot faces same obstacle
+    - Too high (800): Robot turns too much, might face a new obstacle
+    - Sweet spot: 400-600 ms for 90-degree turns
+
+  MOVE_SPEED (default: 160)
+    - How fast the robot moves between obstacles
+    - Too slow (80): Takes forever, might not complete the course
+    - Too fast (250): Can't stop or turn in time
+    - Sweet spot: 140-180 for most courses
+
+  SCAN_DELAY (default: 600 ms)
+    - How long to wait after moving the sensor
+    - Too short: Inaccurate readings
+    - Too long: Robot wastes time scanning
+    - Sweet spot: 400-800 ms
+
+  TUNING TIP: Change ONE value at a time, test, then change another.
+  If you change multiple values at once, you won't know which change
+  helped (or hurt)!
+
+
+THE NAVIGATION ALGORITHM
+=========================
+Here's the complete algorithm your robot will follow:
+
+  1. CHECK distance ahead
+  2. IF path is clear:
+       - Move forward
+  3. IF obstacle detected:
+       a. STOP
+       b. SCAN left and right
+       c. COMPARE distances
+       d. IF left is clearer: turn left
+          IF right is clearer: turn right
+          IF both blocked: back up and turn around
+       e. RECENTER the sensor
+  4. REPEAT from step 1
+
+  Written as pseudocode (not real code, but shows the logic):
+
+    LOOP FOREVER:
+      centerDistance = scan center
+      IF centerDistance > SAFE_DISTANCE:
+        move forward
+      ELSE:
+        stop motors
+        leftDistance = scan left
+        rightDistance = scan right
+        recenter sensor
+
+        IF left > right AND left > SAFE_DISTANCE:
+          turn left
+        ELSE IF right > SAFE_DISTANCE:
+          turn right
+        ELSE:
+          back up
+          turn around
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  // CONFIGURATION - Adjust these for your course!
+  const int SAFE_DISTANCE = 30;
+  const int TURN_DURATION = 500;
+  const int MOVE_SPEED = 160;
+  const int SCAN_DELAY = 600;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 11: Simple Obstacle Course");
+    car.setup();
+    car.attachSensorServo(10);
+    car.centerServo();
+    Serial.println("OBSTACLE COURSE READY!");
+    Serial.println("Starting in 3 seconds...");
+    delay(3000);
+  }
+
+  void loop() {
+    Serial.println("=== OBSTACLE COURSE RUN ===");
+    Serial.println("Duration: 20 seconds");
+
+    unsigned long startTime = millis();
+    int obstaclesAvoided = 0;
+
+    // Run for 20 seconds
+    while(millis() - startTime < 20000) {
+
+      int centerDist = car.getCenterDistance();
+      Serial.print("Center: ");
+      Serial.print(centerDist);
+
+      if(centerDist < SAFE_DISTANCE) {
+        // OBSTACLE!
+        Serial.println(" - OBSTACLE!");
+        obstaclesAvoided++;
+        car.stopMotors();
+        delay(300);
+
+        // Scan
+        int leftDist = car.getLeftDistance();
+        int rightDist = car.getRightDistance();
+        car.centerServo();
+        delay(300);
+
+        Serial.print("  Left: ");
+        Serial.print(leftDist);
+        Serial.print("  Right: ");
+        Serial.println(rightDist);
+
+        // Decide
+        if(leftDist > rightDist && leftDist > SAFE_DISTANCE) {
+          Serial.println("  -> Turn LEFT");
+          car.turnLeft(MOVE_SPEED, TURN_DURATION);
+        } else if(rightDist > SAFE_DISTANCE) {
+          Serial.println("  -> Turn RIGHT");
+          car.turnRight(MOVE_SPEED, TURN_DURATION);
+        } else {
+          Serial.println("  -> BLOCKED - Turn around");
+          car.moveBackward(MOVE_SPEED, 800);
+          delay(300);
+          car.turnRight(MOVE_SPEED, 1000);
+        }
+
+        delay(300);
+      } else {
+        Serial.println(" - Clear, forward");
+        car.moveForward(MOVE_SPEED, 300);
+        delay(100);
+      }
+    }
+
+    car.stopMotors();
+    Serial.println("=== COURSE COMPLETE! ===");
+    Serial.print("Obstacles avoided: ");
+    Serial.println(obstaclesAvoided);
+    delay(10000);
+  }
+
+
+SETTING UP YOUR OBSTACLE COURSE
+=================================
+
+  Materials needed:
+    - An open floor area, about 2m x 2m (6ft x 6ft)
+    - 4-6 obstacles (water bottles, boxes, books, cups)
+    - Tape for start and finish markers (optional)
+
+  Course layout tips:
+    - Space obstacles at least 30 cm apart (robot needs room!)
+    - Place some obstacles straight ahead, some off to the side
+    - Create at least one "narrow passage" for extra challenge
+    - Leave a clear start area and finish area
+
+  Difficulty levels:
+    EASY:   4 obstacles, widely spaced, open area
+    MEDIUM: 5 obstacles, moderate spacing
+    HARD:   6 obstacles, tight spacing, narrow passages
+
+  Example layout:
+
+    START ----->  [box]
+                            [bottle]
+        [book]
+                    [cup]        [bottle]
+                                            FINISH
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Navigate the Course
+
+  Your mission:
+    1. Set up a course with at least 5 obstacles
+    2. Tune the configuration values for YOUR course
+    3. Complete the course in under 30 seconds
+    4. Avoid all obstacles (zero collisions!)
+    5. Print clear status messages throughout
+
+  Scoring:
+    - Complete the course: 50 points
+    - Zero collisions: 20 points
+    - Under 30 seconds: 10 points
+    - Under 20 seconds: 10 bonus points
+    - Clean code with good messages: 10 points
+    Total possible: 100 points
+
+  Tuning Process:
+    1. Start with the default configuration values
+    2. Run the course and observe
+    3. Was SAFE_DISTANCE too high or too low? Adjust.
+    4. Were turns too much or too little? Adjust TURN_DURATION.
+    5. Was the robot too slow or too fast? Adjust MOVE_SPEED.
+    6. Repeat until you get consistent good runs
+
+  Bonus Challenges:
+    1. Add adaptive speed (fast when clear, slow near obstacles)
+    2. Add a "preferred direction" (always prefer left turns)
+    3. Track time and compare multiple runs
+    4. Create a harder course and re-tune
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Changing multiple configuration values at once
+  2. Making SAFE_DISTANCE too small (causes crashes)
+  3. Making MOVE_SPEED too high (can't stop in time)
+  4. Forgetting to recenter the servo after scanning
+  5. Not handling the "all blocked" scenario
+
+
+TEACHER NOTES
+=============
+  - Set up multiple identical courses for simultaneous testing
+  - Have a class competition: fastest clean run wins!
+  - Create a leaderboard on the board
+  - Discuss the engineering design process: design, test, improve
+  - This is a great assessment lesson - practical application of
+    everything learned in Lessons 1-10
+  - Allow students to observe other teams' strategies
+
+=============================================================================
+  END OF LESSON 11
+=============================================================================

@@ -1,3 +1,22 @@
+# CarControl Library - Examples and Lessons
+
+## 🎓 NEW! Progressive Lesson Series (16 Lessons)
+
+**Start here if you're new to robotics!** This folder now includes a complete curriculum from beginner to advanced:
+
+- **Lessons 01-03:** Linear Motion (forward/backward)
+- **Lessons 04-06:** Rotational Motion (turning)
+- **Lessons 07-08:** Ultrasonic Sensing
+- **Lessons 09-10:** Servo Control & Obstacle Avoidance
+- **Lessons 11-12:** Obstacle Courses
+- **Lessons 13-14:** Line Following
+- **Lessons 15-16:** Autonomous Robot Design (Final Project)
+
+📖 **See:** `LESSON_PLAN.md` and `COMPLETE_LESSON_GUIDE.md` in the root folder for full curriculum.
+🎯 **Quick Ref:** `QUICK_REFERENCE.md` for command cheat sheet
+
+---
+
 ## Controlling the ELEGOO Arduino Smart Car
 
 The Car Control Library provides you with a suite of functions to control the car's movements with ease.

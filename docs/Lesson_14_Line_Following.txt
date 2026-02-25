@@ -1,0 +1,327 @@
+=============================================================================
+  LESSON 14: LINE FOLLOWING
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+Now that you understand line sensors, it's time to make your robot
+FOLLOW a line! This is one of the classic robotics challenges. Your
+robot will drive along a black line on a white surface, constantly
+correcting its course to stay centered. It's like walking on a
+balance beam - constant small adjustments keep you on track.
+
+Time Required: 75-90 minutes
+Difficulty: Intermediate-Advanced
+Prerequisites: Lessons 01-13
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Implement a basic line-following algorithm
+  2. Use the built-in followLine() function
+  3. Create a manual line follower with status messages
+  4. Handle curves and gentle turns in the line
+  5. Combine line following with obstacle detection
+
+
+VOCABULARY
+==========
+  Line following - Making a robot automatically follow a path marked
+                   on the ground. One of the most common robot tasks.
+
+  Correction     - A small adjustment to stay on course. Turn slightly
+                   left or right to keep the sensor over the line.
+
+  Overshoot      - Correcting too much, going past the line to the
+                   other side. Like swerving when you jerk the steering
+                   wheel too hard.
+
+  PID control    - A fancy math technique that makes corrections
+                   smooth and precise. (Advanced topic - we'll use
+                   a simpler approach.)
+
+
+THE LINE-FOLLOWING ALGORITHM
+==============================
+The idea is simple: constantly check where the line is and correct.
+
+  IF middle sensor sees the line:
+    Robot is centered → move FORWARD
+    (Great! We're on track!)
+
+  IF left sensor sees the line (middle doesn't):
+    Robot has drifted RIGHT → turn LEFT to correct
+    (The line is to our left, so we need to go left!)
+
+  IF right sensor sees the line (middle doesn't):
+    Robot has drifted LEFT → turn RIGHT to correct
+    (The line is to our right, so we need to go right!)
+
+  IF no sensor sees the line:
+    Robot has lost the line → STOP or SEARCH
+    (We're completely off track!)
+
+  This creates a "wiggle" behavior where the robot constantly
+  makes tiny corrections. The faster you correct, the smoother
+  the following appears.
+
+
+THE CORRECTION CONCEPT
+========================
+Imagine driving a car and trying to stay in the center of a lane:
+
+  Slightly drifting left  → small turn right (gentle correction)
+  Really far left         → bigger turn right (strong correction)
+  Perfectly centered      → go straight (no correction needed)
+  Really far right        → bigger turn left (strong correction)
+  Slightly drifting right → small turn left (gentle correction)
+
+  In code, we do the same thing:
+    Slight corrections: short turn duration (30-50ms)
+    Strong corrections: longer turn duration (50-80ms)
+    No correction: move forward
+
+
+SPEED AND SMOOTHNESS
+=====================
+  Line following speed matters a LOT:
+
+  Too SLOW (speed < 100):
+    - Robot barely moves
+    - Very accurate but painfully slow
+    - Good for testing
+
+  Good speed (100-150):
+    - Smooth following with occasional corrections
+    - Best balance of speed and accuracy
+    - Recommended for beginners
+
+  Too FAST (speed > 200):
+    - Robot overshoots constantly
+    - Misses turns and flies off the line
+    - Only works on straight sections
+
+  Rule of thumb: Start slow and gradually increase speed.
+  A smooth robot at medium speed LOOKS faster than a jerky robot
+  at high speed (because the jerky one wastes time correcting).
+
+
+NEW COMMANDS YOU WILL LEARN
+===========================
+
+  followLine(threshold)
+  ---------------------
+  What it does:  Built-in function that follows a line for one cycle.
+                 Call it repeatedly in a loop for continuous following.
+  Parameter:     threshold - the line detection threshold (e.g., 500)
+  How to use it: car.followLine(500);
+  When to call:  Inside a while loop or the main loop()
+
+  -------------------------------------------------------------------------
+
+  followLineMultiSensor(threshold)
+  --------------------------------
+  What it does:  Alternative line following using all 3 sensors for
+                 smoother tracking.
+  Parameter:     threshold - the line detection threshold
+
+  -------------------------------------------------------------------------
+
+  stopAtLine(threshold)
+  ---------------------
+  What it does:  Stops the robot when it reaches a line.
+                 Useful for stopping at an intersection or finish line.
+  Parameter:     threshold - the line detection threshold
+
+
+COMPLETE CODE WITH EXPLANATIONS
+================================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int LINE_THRESHOLD = 500;
+  const int FOLLOW_SPEED = 140;
+  const int TURN_SPEED = 120;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 14: Line Following");
+    car.setup();
+    car.initLineSensors();
+    Serial.println("Place robot on line and watch it follow!");
+    delay(3000);
+  }
+
+  void loop() {
+    // METHOD 1: Built-in line following (10 seconds)
+    Serial.println("Using built-in followLine...");
+
+    unsigned long startTime = millis();
+    while(millis() - startTime < 10000) {
+      car.followLine(LINE_THRESHOLD);
+      delay(50);
+    }
+    car.stopMotors();
+    delay(3000);
+
+    // METHOD 2: Manual line following with feedback (15 seconds)
+    Serial.println("Manual line following with status...");
+
+    startTime = millis();
+    while(millis() - startTime < 15000) {
+      int leftValue = car.getLineSensorLeft();
+      int middleValue = car.getLineSensorMiddle();
+      int rightValue = car.getLineSensorRight();
+
+      boolean leftOnLine = (leftValue < LINE_THRESHOLD);
+      boolean middleOnLine = (middleValue < LINE_THRESHOLD);
+      boolean rightOnLine = (rightValue < LINE_THRESHOLD);
+
+      if(middleOnLine) {
+        // Centered - go straight!
+        Serial.println("Centered - Forward");
+        car.moveForward(FOLLOW_SPEED, 100);
+      } else if(leftOnLine) {
+        // Line is to the left - turn left
+        Serial.println("Drifted right - Correcting left");
+        car.turnLeft(TURN_SPEED, 50);
+      } else if(rightOnLine) {
+        // Line is to the right - turn right
+        Serial.println("Drifted left - Correcting right");
+        car.turnRight(TURN_SPEED, 50);
+      } else {
+        // Lost the line!
+        Serial.println("LOST LINE - Stopping");
+        car.stopMotors();
+        delay(500);
+      }
+
+      delay(50);
+    }
+
+    car.stopMotors();
+    delay(3000);
+
+    // METHOD 3: Smooth following with multi-level correction
+    Serial.println("Smooth following (20 seconds)...");
+
+    startTime = millis();
+    while(millis() - startTime < 20000) {
+      int L = car.getLineSensorLeft();
+      int M = car.getLineSensorMiddle();
+      int R = car.getLineSensorRight();
+
+      boolean bL = (L < LINE_THRESHOLD);
+      boolean bM = (M < LINE_THRESHOLD);
+      boolean bR = (R < LINE_THRESHOLD);
+
+      if(bM && !bL && !bR) {
+        // Perfect center - full speed
+        car.moveForward(FOLLOW_SPEED + 20, 80);
+      } else if(bM && bL && !bR) {
+        // Slightly left - gentle correction
+        car.moveForward(FOLLOW_SPEED, 60);
+        car.turnLeft(TURN_SPEED - 20, 30);
+      } else if(bM && bR && !bL) {
+        // Slightly right - gentle correction
+        car.moveForward(FOLLOW_SPEED, 60);
+        car.turnRight(TURN_SPEED - 20, 30);
+      } else if(bL && !bM && !bR) {
+        // Sharp left - strong correction
+        car.turnLeft(TURN_SPEED, 60);
+      } else if(bR && !bM && !bL) {
+        // Sharp right - strong correction
+        car.turnRight(TURN_SPEED, 60);
+      } else if(bL && bM && bR) {
+        // All sensors on line (intersection!)
+        Serial.println("INTERSECTION!");
+        car.moveForward(FOLLOW_SPEED, 100);
+      } else {
+        // No line - stop
+        car.stopMotors();
+        delay(100);
+      }
+
+      delay(30);
+    }
+
+    car.stopMotors();
+    delay(5000);
+  }
+
+
+CREATING A TEST TRACK
+=======================
+  Materials:
+    - White posterboard or paper (at least 2 ft x 4 ft)
+    - Black electrical tape (3/4 inch or 1 inch width)
+
+  Track ideas:
+    1. SIMPLE: Straight line (great for first test)
+    2. EASY: Gentle curve (sweeping arc)
+    3. MEDIUM: S-curve (left then right)
+    4. HARD: Figure-8 with sharp turns
+    5. EXPERT: Complex track with intersections
+
+  Tips:
+    - Tape should be 1.5-2 cm wide (width of electrical tape)
+    - Curves should be gradual at first
+    - Keep the surface flat
+    - Avoid shadows over the track
+
+
+STUDENT CHALLENGE
+=================
+
+  CHALLENGE: Build and Follow a Track
+
+  Part 1: Create a track with:
+    - A straight section
+    - At least one gentle curve
+    - A start point and end point
+
+  Part 2: Write a program that:
+    1. Follows the line from start to end
+    2. Prints which direction it's correcting
+    3. Stops at the end of the line (when all sensors see white)
+
+  Part 3: Improve your follower:
+    - Use multi-level corrections (gentle vs. strong)
+    - Try different speeds and find the fastest reliable speed
+    - Time your run and try to beat your best time
+
+  Bonus Challenges:
+    1. Follow the line AND stop if an obstacle is detected
+    2. Follow a figure-8 track without losing the line
+    3. Create a track with an intersection and make the robot
+       choose left or right at the intersection
+
+
+COMMON MISTAKES TO AVOID
+=========================
+  1. Wrong threshold - always calibrate first (Lesson 13)!
+  2. Going too fast - start slow and increase gradually
+  3. Corrections too strong - use SHORT turn durations (30-60ms)
+  4. Not handling "lost line" - always have a fallback behavior
+  5. Shadows over the track - move the track to consistent lighting
+
+
+TEACHER NOTES
+=============
+  - Pre-make test tracks before class
+  - Have simple and complex tracks available
+  - Start everyone on the straight-line track
+  - Time trials create great engagement ("Can you beat 12 seconds?")
+  - This is one of the most visually impressive lessons - record videos!
+  - Discuss: How do self-driving warehouse robots follow floor lines?
+  - Real-world connection: Amazon warehouse robots follow floor markers
+
+=============================================================================
+  END OF LESSON 14
+=============================================================================

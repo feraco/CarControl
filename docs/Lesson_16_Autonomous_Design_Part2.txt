@@ -1,0 +1,487 @@
+=============================================================================
+  LESSON 16: AUTONOMOUS DESIGN - PART 2 (CAPSTONE PROJECT)
+  Arduino Robot Car Curriculum
+  By Frederick Feraco - New York State Master Teacher
+=============================================================================
+
+
+LESSON OVERVIEW
+===============
+This is the FINAL LESSON and your CAPSTONE PROJECT. You will design,
+build, and program a fully autonomous robot that completes a complex
+multi-stage mission. This is everything you've learned in one program -
+the ultimate test of your robotics and programming skills!
+
+Time Required: 2-3 class periods (120-180 minutes total)
+Difficulty: Advanced
+Prerequisites: ALL previous lessons (1-15)
+
+
+LESSON OBJECTIVES
+=================
+By the end of this lesson, you will be able to:
+
+  1. Design a complete autonomous mission from scratch
+  2. Implement a multi-state state machine
+  3. Combine ALL robot capabilities in one program
+  4. Handle errors and implement recovery strategies
+  5. Test, debug, and optimize an autonomous system
+
+
+VOCABULARY
+==========
+  Capstone    - A final project that demonstrates everything you've
+                learned. Like the capstone (top stone) of an arch -
+                it holds everything together.
+
+  Multi-stage - A mission with several distinct phases that happen
+                in sequence. Like a rocket launch: ignition → lift-off
+                → stage separation → orbit.
+
+  Error       - When something goes wrong, having a plan to get back
+  recovery      on track instead of just stopping. Like a self-driving
+                car pulling over when confused, rather than freezing
+                in the middle of the road.
+
+  Fault       - The ability to keep working even when something fails.
+  tolerance     If the claw doesn't grab the object, try again instead
+                of giving up.
+
+  Sensor      - Using data from multiple sensors together for better
+  fusion        decisions. Like using both your eyes AND ears to
+                understand what's happening around you.
+
+
+THE ADVANCED STATE MACHINE
+============================
+This mission has 8 states:
+
+  ┌─────────┐
+  │  INIT   │ ← Program starts here
+  └────┬────┘
+       │
+       ▼
+  ┌─────────────┐     ┌──────────────────┐
+  │  SEARCHING  │────→│ APPROACHING      │
+  └──────┬──────┘     │ OBJECT           │
+         │            └────────┬─────────┘
+         │                     │ (reached object)
+         │                     ▼
+         │            ┌──────────────────┐
+         │            │ GRABBING OBJECT  │
+         │            └────────┬─────────┘
+         │                     │ (grabbed)
+         │                     ▼
+         │            ┌──────────────────┐
+         │            │ NAVIGATING TO    │
+         │            │ GOAL             │
+         │            └────────┬─────────┘
+         │                     │ (arrived)
+         │                     ▼
+         │            ┌──────────────────┐
+         │            │ DELIVERING       │
+         │            │ OBJECT           │
+         │            └────────┬─────────┘
+         │                     │ (delivered)
+         │                     ▼
+         │            ┌──────────────────┐
+         │            │ MISSION          │
+         │            │ COMPLETE         │
+         │            └──────────────────┘
+         │
+         │ (too many errors)
+         ▼
+  ┌──────────────────┐
+  │ ERROR RECOVERY   │
+  └──────────────────┘
+
+  Each state has:
+    - Entry condition: What triggers this state
+    - Behavior: What the robot does in this state
+    - Exit condition: What causes transition to next state
+    - Error handling: What happens if something goes wrong
+
+
+CREATING THE STATE MACHINE IN CODE
+====================================
+
+  enum MissionState {
+    INIT,
+    SEARCHING,
+    APPROACHING_OBJECT,
+    GRABBING_OBJECT,
+    NAVIGATING_TO_GOAL,
+    DELIVERING_OBJECT,
+    RETURNING_TO_START,
+    MISSION_COMPLETE,
+    ERROR_RECOVERY
+  };
+
+  MissionState state = INIT;  // Start in INIT state
+
+  Transitioning between states:
+    state = SEARCHING;          // Move to the next state
+    state = ERROR_RECOVERY;     // Jump to error recovery
+
+  Checking current state:
+    switch(state) {
+      case INIT:
+        // Do initialization
+        state = SEARCHING;  // Transition
+        break;
+      case SEARCHING:
+        // Search for objects
+        if(objectFound) state = APPROACHING_OBJECT;
+        break;
+      // ... and so on for each state
+    }
+
+
+EACH STATE EXPLAINED
+=====================
+
+  STATE: INIT
+    Purpose: Set up everything before the mission starts
+    Does:    Open claw, center servo, wait 1 second
+    Next:    Automatically goes to SEARCHING
+
+  STATE: SEARCHING
+    Purpose: Explore the area looking for objects
+    Does:    Navigate while scanning for nearby objects
+    Next:    APPROACHING_OBJECT when object detected at <25cm
+    Error:   If searching too long, might be stuck
+
+  STATE: APPROACHING_OBJECT
+    Purpose: Get close enough to grab the detected object
+    Does:    Slowly move forward, checking distance each step
+    Next:    GRABBING_OBJECT when within 10cm
+    Error:   If can't get close, go back to SEARCHING
+
+  STATE: GRABBING_OBJECT
+    Purpose: Close the claw on the object
+    Does:    Stop, wait, close claw, wait for secure grip
+    Next:    NAVIGATING_TO_GOAL
+
+  STATE: NAVIGATING_TO_GOAL
+    Purpose: Carry the object to the delivery zone
+    Does:    Turn toward goal, drive forward
+    Next:    DELIVERING_OBJECT when near the goal
+
+  STATE: DELIVERING_OBJECT
+    Purpose: Release the object at the delivery zone
+    Does:    Stop, open claw, wait for release
+    Next:    MISSION_COMPLETE (or SEARCHING for more objects)
+
+  STATE: ERROR_RECOVERY
+    Purpose: Get out of trouble when something goes wrong
+    Does:    Back up, turn around, reset error counter
+    Next:    SEARCHING (try again!)
+
+
+ERROR HANDLING STRATEGY
+========================
+Things WILL go wrong. Plan for it:
+
+  1. Track errors:
+     int errorCount = 0;
+
+  2. When something fails:
+     errorCount++;
+     if(errorCount > 3) {
+       state = ERROR_RECOVERY;  // Too many errors!
+     } else {
+       state = SEARCHING;       // Try again
+     }
+
+  3. In ERROR_RECOVERY:
+     Back up, turn around, reset errorCount
+     Go back to SEARCHING
+
+  4. Mission timeout:
+     If the entire mission takes longer than 60 seconds,
+     stop and report what was accomplished.
+
+  The key principle: NEVER just stop. Always have a plan for
+  what to do when things go wrong.
+
+
+COMPLETE CODE OUTLINE
+======================
+
+  #include <CarControl.h>
+  CarControl car(5, 6, 7, 8, 3, 2);
+
+  const int SAFE_DISTANCE = 35;
+  const int LINE_THRESHOLD = 500;
+  const int CRUISE_SPEED = 170;
+  const int CAREFUL_SPEED = 100;
+
+  enum MissionState {
+    INIT, SEARCHING, APPROACHING_OBJECT, GRABBING_OBJECT,
+    NAVIGATING_TO_GOAL, DELIVERING_OBJECT, MISSION_COMPLETE,
+    ERROR_RECOVERY
+  };
+
+  MissionState state = INIT;
+  int objectsDelivered = 0;
+  int errorCount = 0;
+
+  void setup() {
+    Serial.begin(9600);
+    Serial.println("Lesson 16: Autonomous Design - Part 2");
+    car.setup();
+    car.initLineSensors();
+    car.attachSensorServo(10);
+    car.attachClaw(11);
+    car.centerServo();
+    car.openClaw();
+    delay(2000);
+  }
+
+  void loop() {
+    Serial.println("=== AUTONOMOUS MISSION ===");
+    state = INIT;
+    objectsDelivered = 0;
+    errorCount = 0;
+
+    unsigned long missionStart = millis();
+    unsigned long timeout = 60000;  // 60 second mission
+
+    while(millis() - missionStart < timeout
+          && state != MISSION_COMPLETE) {
+
+      // Print current state
+      Serial.print("[STATE: ");
+      // ... print state name ...
+      Serial.println("]");
+
+      switch(state) {
+
+        case INIT:
+          car.openClaw();
+          car.centerServo();
+          delay(1000);
+          state = SEARCHING;
+          break;
+
+        case SEARCHING:
+          {
+            int dist = car.getCenterDistance();
+            if(dist < 25 && dist > 5) {
+              Serial.println("OBJECT DETECTED!");
+              state = APPROACHING_OBJECT;
+            } else {
+              // Navigate while searching
+              if(dist < SAFE_DISTANCE) {
+                int left = car.getLeftDistance();
+                int right = car.getRightDistance();
+                car.centerServo();
+                if(left > right) car.turnLeft(CRUISE_SPEED, 400);
+                else car.turnRight(CRUISE_SPEED, 400);
+              } else {
+                car.moveForward(CRUISE_SPEED, 300);
+              }
+            }
+          }
+          break;
+
+        case APPROACHING_OBJECT:
+          {
+            int dist = car.getCenterDistance();
+            int attempts = 0;
+            while(dist > 8 && dist < 100 && attempts < 20) {
+              car.moveForward(CAREFUL_SPEED, 100);
+              dist = car.getCenterDistance();
+              attempts++;
+              delay(100);
+            }
+            if(dist <= 12) {
+              state = GRABBING_OBJECT;
+            } else {
+              errorCount++;
+              state = (errorCount > 3) ? ERROR_RECOVERY : SEARCHING;
+            }
+          }
+          break;
+
+        case GRABBING_OBJECT:
+          car.closeClaw();
+          delay(1500);
+          car.moveBackward(CAREFUL_SPEED, 500);
+          delay(500);
+          state = NAVIGATING_TO_GOAL;
+          break;
+
+        case NAVIGATING_TO_GOAL:
+          car.turnLeft(CRUISE_SPEED, 600);
+          delay(500);
+          car.moveForward(CRUISE_SPEED, 2000);
+          state = DELIVERING_OBJECT;
+          break;
+
+        case DELIVERING_OBJECT:
+          car.openClaw();
+          delay(1500);
+          objectsDelivered++;
+          Serial.print("DELIVERED! Count: ");
+          Serial.println(objectsDelivered);
+          state = MISSION_COMPLETE;
+          break;
+
+        case ERROR_RECOVERY:
+          car.moveBackward(CRUISE_SPEED, 1000);
+          delay(500);
+          car.turnRight(CRUISE_SPEED, 800);
+          delay(500);
+          errorCount = 0;
+          state = SEARCHING;
+          break;
+
+        case MISSION_COMPLETE:
+          Serial.println("=== MISSION ACCOMPLISHED! ===");
+          Serial.print("Objects delivered: ");
+          Serial.println(objectsDelivered);
+          Serial.print("Time: ");
+          Serial.print((millis() - missionStart) / 1000);
+          Serial.println(" seconds");
+          car.stopMotors();
+          break;
+      }
+
+      delay(100);
+    }
+
+    if(state != MISSION_COMPLETE) {
+      Serial.println("MISSION TIMEOUT!");
+    }
+
+    car.stopMotors();
+    delay(15000);
+  }
+
+
+STUDENT CHALLENGE: FINAL CAPSTONE PROJECT
+==========================================
+
+  Design and build YOUR OWN autonomous robot mission!
+
+  Choose ONE of these missions or create your own:
+
+  MISSION 1: Warehouse Robot
+    - Navigate to a storage area (follow a line on the floor)
+    - Find a "package" (small object)
+    - Pick it up with the claw
+    - Deliver it to a drop-off zone
+    - Return to the start
+    - Repeat for multiple packages
+
+  MISSION 2: Security Patrol
+    - Patrol an area by driving in a pattern
+    - Avoid all obstacles
+    - Change direction every 10 seconds
+    - If an object is very close (<10cm), stop and "alert" (beep)
+    - Continue patrol after alert
+    - Run for 2 minutes
+
+  MISSION 3: Maze Solver
+    - Enter a simple maze (walls made of boxes)
+    - Navigate through by scanning and choosing paths
+    - Detect dead ends and back out
+    - Track how many turns you've made
+    - Reach the exit (open space with no walls)
+
+  MISSION 4: Your Own Design!
+    - Define a clear mission objective
+    - Use at least 3 different sensor types
+    - Implement at least 4 states
+    - Include error recovery
+    - Run for at least 30 seconds
+
+  PROJECT REQUIREMENTS:
+    1. Written design document (plan BEFORE coding):
+       - Mission description (what does the robot do?)
+       - State diagram (draw the states and transitions)
+       - List of commands you'll use
+       - Predicted challenges
+
+    2. Working code that:
+       - Uses a state machine with at least 4 states
+       - Combines at least 2 sensor types
+       - Includes error recovery
+       - Prints clear status messages
+       - Runs autonomously for at least 30 seconds
+
+    3. Presentation:
+       - Demo the robot completing the mission
+       - Explain your design decisions
+       - Show what challenges you overcame
+       - Suggest improvements for a "version 2"
+
+
+GRADING RUBRIC
+===============
+
+  DESIGN (25 points)
+    Clear mission description:           5 points
+    Complete state diagram:              10 points
+    Identified challenges and solutions: 10 points
+
+  CODE QUALITY (25 points)
+    Uses state machine correctly:        10 points
+    Code is well-organized (functions):   5 points
+    Code is well-commented:               5 points
+    Error handling included:              5 points
+
+  FUNCTIONALITY (35 points)
+    Robot completes basic mission:       15 points
+    Uses 2+ sensor types:               10 points
+    Handles errors gracefully:           10 points
+
+  PRESENTATION (15 points)
+    Clear explanation of design:          5 points
+    Live demonstration:                   5 points
+    Reflection on improvements:           5 points
+
+  TOTAL: 100 points
+
+
+WHAT YOU'VE ACCOMPLISHED
+=========================
+Look how far you've come! You started knowing NOTHING about robotics
+or programming, and now you can:
+
+  ✓ Write Arduino code from scratch
+  ✓ Control motors for precise movement
+  ✓ Use ultrasonic sensors to detect obstacles
+  ✓ Control servos for scanning and gripping
+  ✓ Follow lines using infrared sensors
+  ✓ Create autonomous behaviors
+  ✓ Implement state machines
+  ✓ Handle errors and unexpected situations
+  ✓ Design, build, test, and improve robotic systems
+
+These are REAL skills used by robotics engineers, software developers,
+and autonomous systems designers. Whether you continue into robotics,
+computer science, or any other field - the problem-solving skills you've
+developed will serve you well!
+
+
+TEACHER NOTES
+=============
+  - This is a 2-3 class period project
+  - Class 1: Design phase (written plan, state diagram)
+  - Class 2: Coding and testing
+  - Class 3: Presentations and demonstrations
+  - Have students peer-review designs before coding starts
+  - Set up a dedicated testing area for each team
+  - Record the final demonstrations for portfolios
+  - Consider inviting other classes or administrators to watch demos
+  - Celebrate accomplishments - this is a big achievement!
+  - Collect design documents and code as portfolio pieces
+  - Connect to career paths: robotics engineer, software developer,
+    autonomous systems engineer, mechatronics engineer
+
+=============================================================================
+  CONGRATULATIONS ON COMPLETING THE ENTIRE CURRICULUM!
+  You are now a robot programmer!
+=============================================================================
