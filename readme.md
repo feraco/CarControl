@@ -1,208 +1,356 @@
-## Controlling the ELEGOO Arduino Smart Car
+# CarControl Library
 
-The Car Control Library provides you with a suite of functions to control the car's movements with ease.
+An Arduino library for controlling ELEGOO-style smart robot cars. Designed for classroom use, CarControl wraps low-level motor, sensor, and servo operations into simple, readable commands so students can focus on logic and problem-solving instead of wiring details.
 
-### Functions:
+**Author:** Frederick Feraco — New York State Master Teacher  
+**Version:** 2.1.0  
+**License:** Open Source  
+**Platform:** Arduino (all architectures)
 
-1. **Move Forward**
-   - `car.moveForward(speed, duration);`
-   - **Description**: Moves the car forward.
-   - **Parameters**:
-     - `speed`: Speed of the car.
-     - `duration`: Duration in milliseconds.
-   - **Example**: `car.moveForward(255, 2000);` moves the car forward at maximum speed for 2 seconds.
+---
 
-2. **Move Backward**
-   - `car.moveBackward(speed, duration);`
-   - **Description**: Moves the car backward.
-   - **Parameters**:
-     - `speed`: Speed of the car.
-     - `duration`: Duration in milliseconds.
-   - **Example**: `car.moveBackward(200, 1500);` moves the car backward at speed 200 for 1.5 seconds.
+## Table of Contents
 
-3. **Turn Left**
-   - `car.turnLeft(speed, duration);`
-   - **Description**: Turns the car left.
-   - **Parameters**:
-     - `speed`: Speed of the turn.
-     - `duration`: Duration in milliseconds.
-   - **Example**: `car.turnLeft(180, 1000);` turns the car left at speed 180 for 1 second.
+- [Features](#features)
+- [Hardware Requirements](#hardware-requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [API Reference](#api-reference)
+  - [Movement](#movement)
+  - [Ultrasonic Sensor](#ultrasonic-sensor)
+  - [Servo & Claw](#servo--claw)
+  - [Line Sensors](#line-sensors)
+  - [Buzzer & Audio](#buzzer--audio)
+  - [RGB LED](#rgb-led)
+  - [Battery Monitoring](#battery-monitoring)
+- [Curriculum (16 Lessons)](#curriculum-16-lessons)
+- [Examples](#examples)
+- [Pin Reference](#pin-reference)
+- [Troubleshooting](#troubleshooting)
 
-4. **Turn Right**
-   - `car.turnRight(speed, duration);`
-   - **Description**: Turns the car right.
-   - **Parameters**:
-     - `speed`: Speed of the turn.
-     - `duration`: Duration in milliseconds.
-   - **Example**: `car.turnRight(150, 500);` turns the car right at speed 150 for half a second.
+---
 
-5. **Stop Motors**
-   - `car.stopMotors();`
-   - **Description**: Stops all of the car's motors.
-   - **Example**: `car.stopMotors();` stops the car.
+## Features
 
-6. **Stop Time**
-   - `car.stopTime(mS);`
-   - **Description**: Places the car in standby for a specified duration.
-   - **Parameters**:
-     - `mS`: Standby time in milliseconds.
-   - **Example**: `car.stopTime(1000);` puts the car in standby for 1 second.
+- Simple, beginner-friendly API for motor control
+- Ultrasonic distance sensing with servo-mounted scanning
+- 3-sensor line following and intersection detection
+- Claw servo for object manipulation
+- RGB LED feedback, buzzer patterns, and Star Wars theme
+- Battery level monitoring
+- Includes a complete 16-lesson K-12 robotics curriculum
 
-7. **Turn Around**
-   - `car.turnAround(speed);`
-   - **Description**: Turns the car around 180 degrees.
-   - **Parameters**:
-     - `speed`: Speed of the turn.
-   - **Example**: `car.turnAround(200);` turns the car 180 degrees at speed 200.
+---
 
-8. **Move Slow Forward**
-   - `car.moveSlowForward(duration);`
-   - **Description**: Moves the car forward at a slow speed.
-   - **Parameters**:
-     - `duration`: Duration in milliseconds.
-   - **Example**: `car.moveSlowForward(3000);` moves the car forward slowly for 3 seconds.
+## Hardware Requirements
 
-9. **Follow Line**
-   - `car.followLine(threshold);`
-   - **Description**: Adjusts the car's movement to follow a line based on sensor readings.
-   - **Parameters**:
-     - `threshold`: Value against which sensor readings are compared to detect the line.
-   - **Example**: `car.followLine(1000);` adjusts the car's movement to follow a line, assuming sensor values above 1000 indicate the line's presence.
+| Component | Details |
+|---|---|
+| Microcontroller | Arduino Uno / Nano (or ELEGOO board) |
+| Motor Driver | TB6612FNG (dual H-bridge) |
+| Ultrasonic Sensor | HC-SR04 |
+| Line Sensors | 3× IR reflectance (left, middle, right) |
+| Servos | Sensor servo + claw servo (standard hobby) |
+| RGB LED | NeoPixel-compatible (WS2812) |
+| Buzzer | Passive buzzer (optional) |
+| Battery | 2S Li-ion pack (6.0–8.4 V) |
 
-10. **Stop At Line**
-    - `car.stopAtLine(threshold);`
-    - **Description**: Stops the car when a line is detected by any sensor.
-    - **Parameters**:
-      - `threshold`: Value against which sensor readings are compared to detect the line.
-    - **Example**: `car.stopAtLine(1000);` stops the car when any sensor detects a line with a value below 1000.
+---
 
-11. **Custom Movement**
-    - `car.customMovement(forwardA, forwardB, speedA, speedB, duration);`
-    - **Description**: Executes a custom movement pattern.
-    - **Parameters**:
-      - `forwardA`: Boolean flag to set motor A's direction (forward if `true`, backward if `false`).
-      - `forwardB`: Boolean flag to set motor B's direction.
-      - `speedA`: Speed setting for motor A (0-255).
-      - `speedB`: Speed setting for motor B (0-255).
-      - `duration`: Time for which the movement should last in milliseconds.
-    - **Example**: `car.customMovement(true, false, 200, 150, 2500);` will make motor A move forward and motor B move backward, creating a custom motion for the car.
-    - **Example**: `car.stopAtLine(1000);` stops the car when any sensor detects a line with a value below 1000.
+## Installation
 
+### Arduino IDE (recommended)
 
-### Ultrasonic Sensor Commands
+1. Download or clone this repository.
+2. Copy the `CarControl` folder into your Arduino `libraries` directory:
+   - **macOS:** `~/Documents/Arduino/libraries/`
+   - **Windows:** `Documents\Arduino\libraries\`
+   - **Linux:** `~/Arduino/libraries/`
+3. Restart the Arduino IDE.
+4. The library should appear under **Sketch → Include Library → CarControl**.
 
-12. **Check for Obstacle**
-    - `car.checkObstacleInFront();`
-    - **Description**: Checks if there is an obstacle in front of the car.
-    - **Example**: `car.checkObstacleInFront();` updates the `_obstacleInFront` variable based on whether an obstacle is detected.
+### Dependencies
 
-13. **Get Distance to Obstacle**
-    - `car.getDistanceToObstacle();`
-    - **Description**: Returns the distance to the nearest obstacle in centimeters.
-    - **Example**: `int distance = car.getDistanceToObstacle();` gets the distance to the nearest obstacle.
+The following libraries must also be installed (available through the Arduino Library Manager):
 
-### Claw Mechanism Commands
+- **FastLED** — RGB LED control
+- **Ultrasonic** — HC-SR04 sensor
+- **Servo** — included with the Arduino IDE
 
-14. **Attach Claw**
-    - `car.attachClaw(pin);`
-    - **Description**: Attaches the claw mechanism to the specified pin.
-    - **Parameters**:
-      - `pin`: The pin where the servo for the claw is connected.
-    - **Example**: `car.attachClaw(9);` attaches the claw servo to pin 9.
+---
 
-15. **Open Claw**
-    - `car.openClaw();`
-    - **Description**: Opens the claw.
-    - **Example**: `car.openClaw();` opens the claw.
+## Quick Start
 
-16. **Close Claw**
-    - `car.closeClaw();`
-    - **Description**: Closes the claw.
-    - **Example**: `car.closeClaw();` closes the claw.
+```cpp
+#include <CarControl.h>
 
-### Get Battery Level
+// Initialize: CarControl(PWMA, PWMB, AIN, BIN, STBY, modeSwitch)
+CarControl car(5, 6, 7, 8, 3, 2);
 
-17. **Get Battery Level**
-    - `car.getBatteryLevel();`
-    - **Description**: Retrieves the current battery level as a percentage.
-    - **Returns**: Battery level percentage (0-100%).
-    - **Example**: `float batteryLevel = car.getBatteryLevel();` gets the current battery level percentage.
+void setup() {
+  car.setup();
+}
 
-### Get Battery Voltage
+void loop() {
+  car.moveForward(200, 2000);  // Drive forward at speed 200 for 2 seconds
+  car.stopTime(1000);          // Pause for 1 second
+  car.turnRight(180, 600);     // Turn right
+  car.stopTime(500);
+}
+```
 
-18. **Get Battery Voltage**
-    - `car.getBatteryVoltage();`
-    - **Description**: Measures the current battery voltage.
-    - **Returns**: Battery voltage in volts.
-    - **Example**: `float voltage = car.getBatteryVoltage();` measures and returns the current battery voltage.
-19. **playStarWars()**
-    - **Description**: Plays the Star Wars theme tune using a buzzer attached to the car.
-    - **Example Usage**: `car.playStarWars();`
+Upload this sketch and your car will drive in a repeating rectangular pattern.
 
-20. **attachBuzzer(int pin)**
-    - **Description**: Attaches a buzzer to a specified pin for audio output.
-    - **Parameters**: `pin` - The pin number where the buzzer is connected.
-    - **Example Usage**: `car.attachBuzzer(10);`
+---
 
-21. **beep(int count), singleBeep(), doubleBeep()**
-    - **Description**: Controls buzzer patterns to emit single, double, or a specified number of beeps.
-    - **Example Usage**:
-        - `car.beep(1);` // Emits a single beep.
-        - `car.singleBeep();` // Emits a single beep.
-        - `car.doubleBeep();` // Emits two beeps in quick succession.
+## API Reference
 
-22. **attachSensorServo(int pin)**
-    - **Description**: Attaches a servo motor to a pin for moving sensors, like ultrasonic or infrared, to scan the environment.
-    - **Parameters**: `pin` - The pin number where the servo motor is connected.
-    - **Example Usage**: `car.attachSensorServo(9);`
+### Movement
 
-23. **lookLeft(), lookRight(), centerServo()**
-    - **Description**: Controls the servo's position to turn sensors left, right, or bring them to the center.
-    - **Example Usage**: `car.lookLeft();` // Turns the sensor left.
+| Function | Description |
+|---|---|
+| `car.moveForward(speed, duration)` | Drive forward at `speed` (0–255) for `duration` ms |
+| `car.moveBackward(speed, duration)` | Drive backward at `speed` for `duration` ms |
+| `car.moveSlowForward(duration, speed)` | Drive forward at a low speed for `duration` ms |
+| `car.turnLeft(speed, duration)` | Pivot left at `speed` for `duration` ms |
+| `car.turnRight(speed, duration)` | Pivot right at `speed` for `duration` ms |
+| `car.turnAround()` | Execute a 180-degree turn |
+| `car.stopMotors()` | Immediately stop both motors |
+| `car.stopTime(ms)` | Hold the car in standby for `ms` milliseconds |
+| `car.customMovement(fwdA, fwdB, spdA, spdB, dur)` | Independent control of each motor's direction, speed, and duration |
 
-24. **lightRGBForDuration(CRGB color, int duration)**
-    - **Description**: Lights an RGB LED with a specified color for a set duration.
-    - **Parameters**:
-        - `color`: The color to set the LED.
-        - `duration`: How long the LED should be lit (in milliseconds).
-    - **Example Usage**: `car.lightRGBForDuration(CRGB::Red, 1000);` // Lights up red for 1 second.
+**Example — Drive a Square:**
 
-25. **getLineSensorLeft(), getLineSensorMiddle(), getLineSensorRight()**
-    - **Description**: Retrieves line sensor readings from the left, middle, or right sensor.
-    - **Example Usage**: `int leftValue = car.getLineSensorLeft();` // Gets left sensor reading.
+```cpp
+for (int i = 0; i < 4; i++) {
+  car.moveForward(200, 1000);
+  car.stopTime(300);
+  car.turnRight(180, 600);
+  car.stopTime(300);
+}
+```
 
-26. **getLeftDistance(), getRightDistance(), getCenterDistance()**
-    - **Description**: Gets distance readings from the left, right, or center distance sensors.
-    - **Example Usage**: `int distance = car.getLeftDistance();` // Gets distance from the left sensor.
+---
 
-27. **followLineMultiSensor(int threshold)**
-    - **Description**: Enhanced line following functionality using multiple sensors.
-    - **Parameters**: `threshold` - The sensor value threshold for detecting the line.
-    - **Example Usage**: `car.followLineMultiSensor(500);`
+### Ultrasonic Sensor
 
-28. **followLineUntilCondition(int threshold, unsigned long duration)**
-    - **Description**: Follows a line for a specified duration or until a condition is met.
-    - **Parameters**:
-        - `threshold`: The sensor value threshold for detecting the line.
-        - `duration`: How long to follow the line (in milliseconds).
-    - **Example Usage**: `car.followLineUntilCondition(500, 10000);` // Follows for 10 seconds.
+The HC-SR04 sensor is wired to pins 13 (trigger) and 12 (echo) by default.
 
-29. **intersectionDecision(int threshold, bool (*decisionFunction)())**
-    - **Description**: Makes decisions at intersections during line following based on a user-defined function.
-    - **Parameters**:
-        - `threshold`: The sensor value threshold for detecting the line.
-        - `decisionFunction`: A pointer to a function that determines the action at intersections.
-    - **Example Usage**: `car.intersectionDecision(500, detectIntersection);` // Uses a custom function to decide at intersections.
+| Function | Description |
+|---|---|
+| `car.getDistanceToObstacle()` | Returns the distance to the nearest object in centimeters |
+| `car.checkObstacleInFront()` | Sets an internal flag if an obstacle is detected |
 
-30. **initLineSensors()**
-    - **Description**: Initializes the pins for the line sensors.
-    - **Example Usage**: `car.initLineSensors();`
+**Example — Stop Before Hitting a Wall:**
 
-31. **customMovement(bool forward, bool backward, int speedLeft, int speedRight, int duration)**
-    - **Description**: Allows for custom movement patterns by specifying directions and speeds for each motor.
-    - **Parameters**:
-        - `forward`: Set to true to move forward.
-        - `backward`: Set to true to move backward.
-        - `speedLeft`: Speed for the left motor.
-        - `speedRight`: Speed for the right motor.
-    - **Example Usage**: `car.customMovement(true, false, 200, 150, 2500);`
+```cpp
+int distance = car.getDistanceToObstacle();
+if (distance < 15) {
+  car.stopMotors();
+} else {
+  car.moveForward(180, 100);
+}
+```
+
+---
+
+### Servo & Claw
+
+| Function | Description |
+|---|---|
+| `car.attachSensorServo(pin)` | Attach the sensor-aiming servo to the specified pin |
+| `car.lookLeft()` | Rotate the sensor servo to face left |
+| `car.lookRight()` | Rotate the sensor servo to face right |
+| `car.centerServo()` | Return the sensor servo to center position |
+| `car.getLeftDistance()` | Look left and return the distance reading |
+| `car.getRightDistance()` | Look right and return the distance reading |
+| `car.getCenterDistance()` | Look center and return the distance reading |
+| `car.attachClaw(pin)` | Attach the claw servo to the specified pin |
+| `car.openClaw()` | Open the claw |
+| `car.closeClaw()` | Close the claw |
+
+**Example — Scan and Decide:**
+
+```cpp
+car.attachSensorServo(10);
+int leftDist  = car.getLeftDistance();
+int rightDist = car.getRightDistance();
+
+if (leftDist > rightDist) {
+  car.turnLeft(180, 600);
+} else {
+  car.turnRight(180, 600);
+}
+```
+
+---
+
+### Line Sensors
+
+Three IR reflectance sensors are connected to analog pins A0 (right), A1 (middle), and A2 (left).
+
+| Function | Description |
+|---|---|
+| `car.initLineSensors()` | Initialize the line sensor pins |
+| `car.getLineSensorLeft()` | Read the left sensor value |
+| `car.getLineSensorMiddle()` | Read the middle sensor value |
+| `car.getLineSensorRight()` | Read the right sensor value |
+| `car.followLine(threshold)` | Continuously adjust steering to follow a line |
+| `car.followLineMultiSensor(threshold)` | Enhanced multi-sensor line following |
+| `car.stopAtLine(threshold)` | Stop the car when any sensor detects a line |
+| `car.followLineUntilCondition(threshold, duration)` | Follow a line for a set duration |
+| `car.followLineAvoidObstacle(threshold, obstacleDist)` | Follow a line while avoiding obstacles |
+| `car.intersectionDecision(threshold, decisionFn)` | Call a custom function when an intersection is detected |
+
+> **Note:** The `threshold` value determines what sensor reading counts as "on the line." You may need to calibrate this for your surface. A typical starting value is `500`.
+
+**Example — Basic Line Following:**
+
+```cpp
+car.initLineSensors();
+
+void loop() {
+  car.followLine(500);
+}
+```
+
+---
+
+### Buzzer & Audio
+
+| Function | Description |
+|---|---|
+| `car.attachBuzzer(pin)` | Attach a passive buzzer to the specified pin |
+| `car.beep(count)` | Emit the specified number of beeps |
+| `car.singleBeep()` | Emit one short beep |
+| `car.doubleBeep()` | Emit two quick beeps |
+| `car.playStarWars()` | Play the Star Wars theme melody |
+
+---
+
+### RGB LED
+
+A NeoPixel-compatible LED is connected to pin 4.
+
+| Function | Description |
+|---|---|
+| `car.lightRGBForDuration(color, duration)` | Light the LED with `color` for `duration` ms |
+
+**Example:**
+
+```cpp
+car.lightRGBForDuration(CRGB::Green, 2000);  // Green for 2 seconds
+car.lightRGBForDuration(CRGB::Red, 1000);    // Red for 1 second
+```
+
+---
+
+### Battery Monitoring
+
+| Function | Description |
+|---|---|
+| `car.getBatteryLevel()` | Returns battery charge as a percentage (0–100%) |
+
+**Example:**
+
+```cpp
+float level = car.getBatteryLevel();
+Serial.print("Battery: ");
+Serial.print(level);
+Serial.println("%");
+```
+
+---
+
+## Curriculum (16 Lessons)
+
+This repository includes a complete, progressive robotics curriculum designed for students with no prior coding experience. Each lesson builds on the one before it.
+
+| # | Lesson | Topic |
+|---|---|---|
+| 01 | First Steps — Moving Forward | `moveForward`, `stopTime` |
+| 02 | Going Backward | `moveBackward` |
+| 03 | Linear Motion Challenge | Combining forward/backward movement |
+| 04 | Basic Turning | `turnLeft`, `turnRight` (drive a square) |
+| 05 | Advanced Rotation | Polygons, `turnAround` |
+| 06 | Rotation Challenge | Waypoint navigation |
+| 07 | Ultrasonic Sensor Basics | `getDistanceToObstacle` |
+| 08 | Sensor Servo Control | `lookLeft`, `lookRight`, scanning |
+| 09 | Claw Servo Control | `openClaw`, `closeClaw` |
+| 10 | Obstacle Detection | `if`/`else` with distance readings |
+| 11 | Simple Obstacle Course | Pre-programmed course navigation |
+| 12 | Advanced Obstacle Course | Stuck detection, retry logic |
+| 13 | Line Sensor Basics | `getLineSensorLeft/Middle/Right` |
+| 14 | Line Following | `followLine`, `followLineMultiSensor` |
+| 15 | Autonomous Design Part 1 | State machines, multi-mode robots |
+| 16 | Autonomous Design Part 2 | Final project — full autonomous missions |
+
+**Lesson files:** [`examples/`](examples/) — each lesson is a standalone `.ino` sketch.  
+**Expanded lesson guides:** [`docs/`](docs/) — printable Word-ready documents for each lesson.  
+**Quick reference card:** [`QUICK_REFERENCE.md`](QUICK_REFERENCE.md)  
+**Full teaching guide:** [`COMPLETE_LESSON_GUIDE.md`](COMPLETE_LESSON_GUIDE.md)
+
+---
+
+## Examples
+
+Beyond the curriculum lessons, additional standalone examples are included:
+
+| Example | Description |
+|---|---|
+| `almostsumo` | Sumo-bot behavior using ultrasonic sensing |
+| `basic-movements-with-comments` | Annotated movement demo |
+| `demo-commands` | Showcase of all available commands |
+| `linefollow` | Standalone line-following sketch |
+| `maze-bot` | Maze-solving algorithm |
+| `Sensordata` | Print all sensor readings to Serial Monitor |
+| `ultrasonic_if_obj-stop` | Stop when an object is detected |
+| `clawgrab5cm` | Grab an object within 5 cm |
+| `clawopenclose` | Open and close the claw on a loop |
+| `Factory-reset` | Restore the car to factory firmware |
+
+---
+
+## Pin Reference
+
+| Function | Pin(s) |
+|---|---|
+| Motor PWM A | 5 |
+| Motor PWM B | 6 |
+| Motor Direction AIN | 7 |
+| Motor Direction BIN | 8 |
+| Motor Standby (STBY) | 3 |
+| Mode Switch | 2 |
+| Ultrasonic Trigger | 13 |
+| Ultrasonic Echo | 12 |
+| Sensor Servo | 10 (typical) |
+| Claw Servo | 11 (typical) |
+| Line Sensor Right | A0 |
+| Line Sensor Middle | A1 |
+| Line Sensor Left | A2 |
+| RGB LED (NeoPixel) | 4 |
+| Battery Voltage | A3 |
+| Buzzer | 11 (typical) |
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---|---|
+| Car doesn't move | Check that the battery pack is switched on and fully charged. Verify motor wiring matches the pin assignments above. |
+| Car drifts to one side | The two motors may run at slightly different speeds. Use `customMovement` to fine-tune individual motor speeds. |
+| Ultrasonic reads 0 | Ensure the HC-SR04 is connected to pins 13 (trig) and 12 (echo). Check for loose jumper wires. |
+| Line following is erratic | Calibrate the `threshold` value for your surface. Print sensor readings with `Serial.println()` to find the right value. |
+| Compilation error: "FastLED.h not found" | Install the **FastLED** library via **Sketch → Include Library → Manage Libraries**. |
+| Servo jitters or doesn't move | Servos draw significant current. Ensure the battery is above 7 V. Only attach servos you are actively using. |
+
+---
+
+## Contributing
+
+Contributions, bug reports, and lesson improvements are welcome. Please open an issue or submit a pull request on [GitHub](https://github.com/feraco/CarControl).
+
+---
+
+*Built for educators. Powered by curiosity.*
